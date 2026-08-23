@@ -48,15 +48,17 @@ MONTHS = [
     "SEP", "OCT", "NOV", "DEC"
 ]
 
-
 # ============================================================
 # FUNCTION - READ RAINFALL FILE
 # ============================================================
 
-def read_rainfall_file(uploaded_file):
+def read_rainfall_file(
+    uploaded_file,
+    start_col
+):
 
     # --------------------------------------------------------
-    # READ RAW FILE
+    # READ WITHOUT HEADER
     # --------------------------------------------------------
 
     raw = pd.read_excel(
@@ -65,140 +67,77 @@ def read_rainfall_file(uploaded_file):
     )
 
     # --------------------------------------------------------
-    # FIND HEADER ROW
+    # GET 14 COLUMNS
+    #
+    # YEAR + JAN...DEC + ANNUAL
     # --------------------------------------------------------
 
-    header_row = None
-
-    for i in range(
-        min(20, len(raw))
-    ):
-
-        row = (
-            raw.iloc[i]
-            .astype(str)
-            .str.strip()
-            .str.upper()
-            .tolist()
-        )
-
-        # Check YEAR
-        if any(
-            value in ["YEAR", "YEAR/MONTH"]
-            for value in row
-        ):
-
-            header_row = i
-            break
-
-    # --------------------------------------------------------
-    # IF YEAR HEADER NOT FOUND
-    # --------------------------------------------------------
-
-    if header_row is None:
-
-        # Try to find row containing JAN
-        for i in range(
-            min(20, len(raw))
-        ):
-
-            row = (
-                raw.iloc[i]
-                .astype(str)
-                .str.strip()
-                .str.upper()
-                .tolist()
-            )
-
-            if "JAN" in row:
-
-                header_row = i - 1
-                break
-
-    # --------------------------------------------------------
-    # STILL NOT FOUND
-    # --------------------------------------------------------
-
-    if header_row is None:
-
-        raise ValueError(
-            "Header YEAR tidak dijumpai. "
-            "Sila semak format fail."
-        )
-
-    # --------------------------------------------------------
-    # READ USING HEADER
-    # --------------------------------------------------------
-
-    data = pd.read_excel(
-        uploaded_file,
-        header=header_row
-    )
-
-    # --------------------------------------------------------
-    # CLEAN COLUMN NAMES
-    # --------------------------------------------------------
-
-    data.columns = [
-        str(col)
-        .strip()
-        .upper()
-        for col in data.columns
-    ]
-
-    # --------------------------------------------------------
-    # FIND YEAR COLUMN
-    # --------------------------------------------------------
-
-    year_column = None
-
-    for col in data.columns:
-
-        if "YEAR" in col:
-
-            year_column = col
-            break
-
-    if year_column is None:
-
-        # Sometimes first column is Year
-        year_column = data.columns[0]
-
-    # Rename first column to YEAR
-    data = data.rename(
-        columns={
-            year_column: "YEAR"
-        }
-    )
-
-    # --------------------------------------------------------
-    # FIND MONTH COLUMNS
-    # --------------------------------------------------------
-
-    for month in MONTHS:
-
-        if month not in data.columns:
-
-            data[month] = np.nan
-
-    # --------------------------------------------------------
-    # ANNUAL
-    # --------------------------------------------------------
-
-    if "ANNUAL" not in data.columns:
-
-        data["ANNUAL"] = np.nan
-
-    # --------------------------------------------------------
-    # KEEP REQUIRED COLUMNS
-    # --------------------------------------------------------
-
-    data = data[
-        ["YEAR"] + MONTHS + ["ANNUAL"]
+    data = raw.iloc[
+        :,
+        start_col:start_col + 14
     ].copy()
 
     # --------------------------------------------------------
-    # CONVERT YEAR
+    # FIND FIRST ROW CONTAINING YEAR
+    # --------------------------------------------------------
+
+    data_start = None
+
+    for i in range(
+        len(data)
+    ):
+
+        year = pd.to_numeric(
+            data.iloc[i, 0],
+            errors="coerce"
+        )
+
+        if (
+            pd.notna(year)
+            and
+            1900 <= year <= 2100
+        ):
+
+            data_start = i
+            break
+
+    if data_start is None:
+
+        raise ValueError(
+            "Data tahun tidak dijumpai."
+        )
+
+    # --------------------------------------------------------
+    # TAKE DATA FROM FIRST YEAR
+    # --------------------------------------------------------
+
+    data = data.iloc[
+        data_start:
+    ].copy()
+
+    # --------------------------------------------------------
+    # SET COLUMN NAMES
+    # --------------------------------------------------------
+
+    data.columns = [
+        "YEAR",
+        "JAN",
+        "FEB",
+        "MAR",
+        "APR",
+        "MAY",
+        "JUN",
+        "JUL",
+        "AUG",
+        "SEP",
+        "OCT",
+        "NOV",
+        "DEC",
+        "ANNUAL"
+    ]
+
+    # --------------------------------------------------------
+    # CLEAN YEAR
     # --------------------------------------------------------
 
     data["YEAR"] = pd.to_numeric(
@@ -206,9 +145,14 @@ def read_rainfall_file(uploaded_file):
         errors="coerce"
     )
 
-    # Remove Average / text rows
     data = data[
         data["YEAR"].notna()
+    ].copy()
+
+    data = data[
+        (data["YEAR"] >= 1900)
+        &
+        (data["YEAR"] <= 2100)
     ].copy()
 
     data["YEAR"] = (
@@ -217,7 +161,7 @@ def read_rainfall_file(uploaded_file):
     )
 
     # --------------------------------------------------------
-    # CONVERT MONTHS
+    # CLEAN MONTHS
     # --------------------------------------------------------
 
     for month in MONTHS:
@@ -228,7 +172,7 @@ def read_rainfall_file(uploaded_file):
         )
 
     # --------------------------------------------------------
-    # CONVERT ANNUAL
+    # CLEAN ANNUAL
     # --------------------------------------------------------
 
     data["ANNUAL"] = pd.to_numeric(
@@ -251,6 +195,7 @@ def read_rainfall_file(uploaded_file):
     )
 
     return data
+    
 # ============================================================
 # FILE UPLOAD
 # ============================================================
