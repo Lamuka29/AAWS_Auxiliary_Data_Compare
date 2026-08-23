@@ -1151,29 +1151,13 @@ with tab4:
 
     plt.close(fig)
 # ============================================================
-# TAB 5 - YEARLY ANALYSIS
+# TAB 5 - YEARLY COMPARISON
 # ============================================================
 
 with tab5:
 
     st.subheader(
-        "📅 Yearly Rainfall Analysis"
-    )
-
-    # --------------------------------------------------------
-    # YEARLY DATA
-    # --------------------------------------------------------
-
-    yearly1 = (
-        analysis1
-        .set_index("YEAR")
-        .reindex(common_years)
-    )
-
-    yearly2 = (
-        analysis2
-        .set_index("YEAR")
-        .reindex(common_years)
+        "📅 Yearly Rainfall Comparison"
     )
 
     # --------------------------------------------------------
@@ -1181,94 +1165,44 @@ with tab5:
     # --------------------------------------------------------
 
     yearly_total1 = (
-        yearly1[MONTHS]
-        .sum(
-            axis=1,
-            skipna=True
-        )
+        analysis1
+        .set_index("YEAR")
+        .reindex(common_years)["ANNUAL"]
     )
 
     yearly_total2 = (
-        yearly2[MONTHS]
-        .sum(
-            axis=1,
-            skipna=True
-        )
+        analysis2
+        .set_index("YEAR")
+        .reindex(common_years)["ANNUAL"]
     )
 
     # --------------------------------------------------------
     # YEARLY MEAN
     # --------------------------------------------------------
 
-    yearly_mean1 = (
-        yearly1[MONTHS]
-        .mean(
-            axis=1,
-            skipna=True
-        )
+    yearly_mean1 = yearly_total1.mean(
+        skipna=True
     )
 
-    yearly_mean2 = (
-        yearly2[MONTHS]
-        .mean(
-            axis=1,
-            skipna=True
-        )
+    yearly_mean2 = yearly_total2.mean(
+        skipna=True
     )
 
     # --------------------------------------------------------
-    # TABLE
+    # DIFFERENCE
     # --------------------------------------------------------
 
-    yearly_table = pd.DataFrame({
-
-        "Year":
-            common_years,
-
-        f"{station1} Total (mm)":
-            yearly_total1.values,
-
-        f"{station2} Total (mm)":
-            yearly_total2.values,
-
-        "Total Difference (mm)":
-            (
-                yearly_total1.values
-                -
-                yearly_total2.values
-            ),
-
-        f"{station1} Mean (mm)":
-            yearly_mean1.values,
-
-        f"{station2} Mean (mm)":
-            yearly_mean2.values,
-
-        "Mean Difference (mm)":
-            (
-                yearly_mean1.values
-                -
-                yearly_mean2.values
-            )
-
-    })
-
-    st.dataframe(
-        yearly_table.round(2),
-        use_container_width=True,
-        hide_index=True
+    yearly_difference = (
+        yearly_total1
+        - yearly_total2
     )
 
-    # ========================================================
-    # YEARLY TOTAL GRAPH
-    # ========================================================
-
-    st.subheader(
-        "📊 Yearly Total Rainfall"
-    )
+    # --------------------------------------------------------
+    # GRAPH
+    # --------------------------------------------------------
 
     fig, ax = plt.subplots(
-        figsize=(15, 7)
+        figsize=(15, 8)
     )
 
     x = np.arange(
@@ -1283,7 +1217,7 @@ with tab5:
         width=bar_width,
         color="steelblue",
         edgecolor="black",
-        label=station1
+        label=f"{station1} Yearly Total"
     )
 
     bar2 = ax.bar(
@@ -1292,14 +1226,37 @@ with tab5:
         width=bar_width,
         color="darkorange",
         edgecolor="black",
-        label=station2
+        label=f"{station2} Yearly Total"
     )
 
     # --------------------------------------------------------
-    # VALUE LABELS
+    # MEAN LINES
     # --------------------------------------------------------
 
-    for bars in [bar1, bar2]:
+    ax.axhline(
+        yearly_mean1,
+        color="navy",
+        linestyle="--",
+        linewidth=2.5,
+        label=f"{station1} Mean = {yearly_mean1:.1f} mm"
+    )
+
+    ax.axhline(
+        yearly_mean2,
+        color="crimson",
+        linestyle="--",
+        linewidth=2.5,
+        label=f"{station2} Mean = {yearly_mean2:.1f} mm"
+    )
+
+    # --------------------------------------------------------
+    # BAR VALUE LABELS
+    # --------------------------------------------------------
+
+    for bars in [
+        bar1,
+        bar2
+    ]:
 
         for bar in bars:
 
@@ -1321,22 +1278,30 @@ with tab5:
                     fontsize=8
                 )
 
+    # --------------------------------------------------------
+    # GRAPH SETTINGS
+    # --------------------------------------------------------
+
     ax.set_title(
-        "Yearly Total Rainfall",
+        f"Yearly Rainfall Comparison\n"
+        f"{station1} vs {station2}",
         fontsize=16,
         fontweight="bold"
     )
 
-    ax.set_xlabel("Year")
+    ax.set_xlabel(
+        "Year"
+    )
 
     ax.set_ylabel(
-        "Total Rainfall (mm)"
+        "Rainfall (mm)"
     )
 
     ax.set_xticks(x)
 
     ax.set_xticklabels(
-        common_years
+        common_years,
+        rotation=45
     )
 
     ax.grid(
@@ -1345,15 +1310,13 @@ with tab5:
         alpha=0.4
     )
 
+    # Legend outside graph
     ax.legend(
         bbox_to_anchor=(1.02, 1),
-        loc="upper left",
-        borderaxespad=0
+        loc="upper left"
     )
 
-    plt.tight_layout(
-        rect=[0, 0, 0.82, 1]
-    )
+    plt.tight_layout()
 
     st.pyplot(
         fig,
@@ -1362,69 +1325,52 @@ with tab5:
 
     plt.close(fig)
 
-    # ========================================================
-    # YEARLY MEAN GRAPH
-    # ========================================================
+    # --------------------------------------------------------
+    # MEAN SUMMARY
+    # --------------------------------------------------------
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        st.metric(
+            f"{station1} Yearly Mean",
+            f"{yearly_mean1:.2f} mm"
+        )
+
+    with col2:
+
+        st.metric(
+            f"{station2} Yearly Mean",
+            f"{yearly_mean2:.2f} mm"
+        )
+
+    # --------------------------------------------------------
+    # YEARLY TABLE
+    # --------------------------------------------------------
 
     st.subheader(
-        "📈 Yearly Mean Monthly Rainfall"
+        "📋 Yearly Rainfall Table"
     )
 
-    fig, ax = plt.subplots(
-        figsize=(15, 7)
+    yearly_comparison = pd.DataFrame({
+
+        "Year":
+            common_years,
+
+        f"{station1} Total (mm)":
+            yearly_total1.values,
+
+        f"{station2} Total (mm)":
+            yearly_total2.values,
+
+        "Difference (mm)":
+            yearly_difference.values
+
+    })
+
+    st.dataframe(
+        yearly_comparison.round(2),
+        use_container_width=True,
+        hide_index=True
     )
-
-    ax.plot(
-        common_years,
-        yearly_mean1.values,
-        marker="o",
-        linewidth=2.5,
-        label=station1
-    )
-
-    ax.plot(
-        common_years,
-        yearly_mean2.values,
-        marker="o",
-        linewidth=2.5,
-        label=station2
-    )
-
-    ax.set_title(
-        "Yearly Mean Monthly Rainfall",
-        fontsize=16,
-        fontweight="bold"
-    )
-
-    ax.set_xlabel("Year")
-
-    ax.set_ylabel(
-        "Mean Rainfall (mm)"
-    )
-
-    ax.set_xticks(
-        common_years
-    )
-
-    ax.grid(
-        axis="y",
-        linestyle="--",
-        alpha=0.4
-    )
-
-    ax.legend(
-        bbox_to_anchor=(1.02, 1),
-        loc="upper left",
-        borderaxespad=0
-    )
-
-    plt.tight_layout(
-        rect=[0, 0, 0.82, 1]
-    )
-
-    st.pyplot(
-        fig,
-        use_container_width=True
-    )
-
-    plt.close(fig)
