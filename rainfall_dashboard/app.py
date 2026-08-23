@@ -494,27 +494,128 @@ target_year = st.selectbox(
 
 
 # ============================================================
-# READ FILE 1 FOR COMMON YEARS
+# READ FILE 1 - ALL SHEETS
 # ============================================================
 
-file1_results = {}
+file1_data = {}
 
-for year in common_years:
+
+for sheet in excel1.sheet_names:
 
     try:
 
-        file1_results[year] = (
-            read_file1(
-                file1,
-                year
+        raw = pd.read_excel(
+            file1,
+            sheet_name=sheet,
+            header=None,
+            usecols="A:N"
+        )
+
+        # ----------------------------------------------------
+        # DATA STARTS ROW 11
+        # ----------------------------------------------------
+
+        data = raw.iloc[10:].copy()
+
+        data.columns = [
+            "YEAR",
+            "JAN",
+            "FEB",
+            "MAR",
+            "APR",
+            "MAY",
+            "JUN",
+            "JUL",
+            "AUG",
+            "SEP",
+            "OCT",
+            "NOV",
+            "DEC",
+            "ANNUAL"
+        ]
+
+        # ----------------------------------------------------
+        # CONVERT YEAR
+        # ----------------------------------------------------
+
+        data["YEAR"] = pd.to_numeric(
+            data["YEAR"],
+            errors="coerce"
+        )
+
+        data = data[
+            data["YEAR"].notna()
+        ].copy()
+
+        data = data[
+            data["YEAR"].between(
+                1900,
+                2100
             )
+        ].copy()
+
+        if data.empty:
+            continue
+
+        data["YEAR"] = (
+            data["YEAR"]
+            .astype(int)
         )
 
-    except Exception as e:
+        # ----------------------------------------------------
+        # CONVERT MONTHS
+        # ----------------------------------------------------
 
-        st.warning(
-            f"⚠️ File 1 {year}: {e}"
+        for month in MONTHS:
+
+            data[month] = pd.to_numeric(
+                data[month],
+                errors="coerce"
+            )
+
+        # ----------------------------------------------------
+        # MONTHLY TOTAL
+        # ----------------------------------------------------
+
+        monthly_total = (
+            data[MONTHS]
+            .sum(
+                axis=0,
+                skipna=True
+            )
+            .reindex(MONTHS)
         )
+
+        year = int(
+            data["YEAR"].iloc[0]
+        )
+
+        file1_data[year] = {
+            "MONTHLY": monthly_total,
+            "ANNUAL": monthly_total.sum(),
+            "SHEET": sheet
+        }
+
+    except Exception:
+        continue
+
+
+# ============================================================
+# CHECK FILE 1
+# ============================================================
+
+file1_years = sorted(
+    file1_data.keys()
+)
+
+
+if not file1_years:
+
+    st.error(
+        "❌ Tiada data YEAR dijumpai dalam File 1."
+    )
+
+    st.stop()
 
 
 # ============================================================
