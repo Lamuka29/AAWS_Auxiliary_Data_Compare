@@ -241,11 +241,13 @@ if file1 is None or file2 is None:
 try:
 
     data1 = read_rainfall_file(
-        file1
+        file1,
+        start_col=0
     )
-
+    
     data2 = read_rainfall_file(
-        file2
+        file2,
+        start_col=1
     )
 
 except Exception as e:
