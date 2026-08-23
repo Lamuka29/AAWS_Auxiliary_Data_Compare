@@ -604,6 +604,31 @@ with tab1:
                     va="bottom",
                     fontsize=8
                 )
+    # ========================================================
+    # TARGET YEAR VALUE LABELS
+    # ========================================================
+    
+    for values in [
+        target1.values,
+        target2.values
+    ]:
+    
+        for i, value in enumerate(values):
+    
+            if pd.notna(value):
+    
+                ax.annotate(
+                    f"{value:.1f}",
+                    (
+                        x[i],
+                        value
+                    ),
+                    xytext=(0, -15),
+                    textcoords="offset points",
+                    ha="center",
+                    va="top",
+                    fontsize=8
+                )
 
     ax.set_title(
         f"{station1} vs {station2}\n"
