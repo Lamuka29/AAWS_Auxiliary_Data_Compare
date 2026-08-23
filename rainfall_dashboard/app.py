@@ -668,31 +668,11 @@ anomaly2 = (
 with tab2:
 
     st.subheader(
-        f"📈 Rainfall Anomaly - {target_year}"
+        f"📊 Monthly Rainfall Anomaly - {target_year}"
     )
-
-    anomaly_table = pd.DataFrame({
-
-        "Month":
-            MONTHS,
-
-        f"{station1} Anomaly (%)":
-            anomaly1.values,
-
-        f"{station2} Anomaly (%)":
-            anomaly2.values
-
-    })
-
-    st.dataframe(
-        anomaly_table.round(2),
-        use_container_width=True,
-        hide_index=True
-    )
-
 
     # --------------------------------------------------------
-    # ANOMALY GRAPH
+    # ANOMALY BAR GRAPH
     # --------------------------------------------------------
 
     fig, ax = plt.subplots(
@@ -703,27 +683,72 @@ with tab2:
         len(MONTHS)
     )
 
+    bar_width = 0.35
+
+    # Station 1
+    bar1 = ax.bar(
+        x - bar_width / 2,
+        anomaly1.values,
+        width=bar_width,
+        color="steelblue",
+        edgecolor="black",
+        label=station1
+    )
+
+    # Station 2
+    bar2 = ax.bar(
+        x + bar_width / 2,
+        anomaly2.values,
+        width=bar_width,
+        color="darkorange",
+        edgecolor="black",
+        label=station2
+    )
+
+    # Zero line
     ax.axhline(
         0,
+        color="black",
         linestyle="--",
         linewidth=1
     )
 
-    ax.plot(
-        x,
-        anomaly1.values,
-        marker="o",
-        linewidth=2.5,
-        label=station1
-    )
+    # --------------------------------------------------------
+    # BAR VALUE LABELS
+    # --------------------------------------------------------
 
-    ax.plot(
-        x,
-        anomaly2.values,
-        marker="o",
-        linewidth=2.5,
-        label=station2
-    )
+    for bars in [bar1, bar2]:
+
+        for bar in bars:
+
+            value = bar.get_height()
+
+            if pd.notna(value):
+
+                if value >= 0:
+                    offset = 5
+                    va = "bottom"
+                else:
+                    offset = -5
+                    va = "top"
+
+                ax.annotate(
+                    f"{value:.1f}%",
+                    (
+                        bar.get_x()
+                        + bar.get_width() / 2,
+                        value
+                    ),
+                    xytext=(0, offset),
+                    textcoords="offset points",
+                    ha="center",
+                    va=va,
+                    fontsize=8
+                )
+
+    # --------------------------------------------------------
+    # GRAPH SETTINGS
+    # --------------------------------------------------------
 
     ax.set_title(
         f"Monthly Rainfall Anomaly - {target_year}",
@@ -731,15 +756,21 @@ with tab2:
         fontweight="bold"
     )
 
-    ax.set_xlabel("Month")
+    ax.set_xlabel(
+        "Month"
+    )
 
     ax.set_ylabel(
         "Anomaly (%)"
     )
 
-    ax.set_xticks(x)
+    ax.set_xticks(
+        x
+    )
 
-    ax.set_xticklabels(MONTHS)
+    ax.set_xticklabels(
+        MONTHS
+    )
 
     ax.grid(
         axis="y",
@@ -757,6 +788,40 @@ with tab2:
     )
 
     plt.close(fig)
+
+
+    # ========================================================
+    # ANOMALY TABLE
+    # ========================================================
+
+    st.subheader(
+        "📋 Monthly Anomaly Table"
+    )
+
+    anomaly_table = pd.DataFrame({
+
+        "Month":
+            MONTHS,
+
+        f"{station1} Anomaly (%)":
+            anomaly1.values,
+
+        f"{station2} Anomaly (%)":
+            anomaly2.values,
+
+        "Difference (%)":
+            (
+                anomaly1.values
+                - anomaly2.values
+            )
+
+    })
+
+    st.dataframe(
+        anomaly_table.round(2),
+        use_container_width=True,
+        hide_index=True
+    )
 # ============================================================
 # TAB 3 - RAINFALL CATEGORY
 # ============================================================
