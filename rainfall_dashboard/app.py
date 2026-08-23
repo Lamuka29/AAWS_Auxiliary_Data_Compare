@@ -601,9 +601,15 @@ with tab1:
         alpha=0.4
     )
 
-    ax.legend()
+    ax.legend(
+        bbox_to_anchor=(1.02, 1),
+        loc="upper left",
+        borderaxespad=0
+    )
 
-    plt.tight_layout()
+    plt.tight_layout(
+        rect=[0, 0, 0.82, 1]
+    )
 
     st.pyplot(
         fig,
@@ -778,9 +784,15 @@ with tab2:
         alpha=0.4
     )
 
-    ax.legend()
+    ax.legend(
+        bbox_to_anchor=(1.02, 1),
+        loc="upper left",
+        borderaxespad=0
+    )
 
-    plt.tight_layout()
+    plt.tight_layout(
+        rect=[0, 0, 0.82, 1]
+    )
 
     st.pyplot(
         fig,
@@ -1053,9 +1065,15 @@ with tab4:
         alpha=0.4
     )
 
-    ax.legend()
+    ax.legend(
+        bbox_to_anchor=(1.02, 1),
+        loc="upper left",
+        borderaxespad=0
+    )
 
-    plt.tight_layout()
+    plt.tight_layout(
+        rect=[0, 0, 0.82, 1]
+    )
 
     st.pyplot(
         fig,
