@@ -489,11 +489,12 @@ target_year = st.selectbox(
 # ANALYSIS TABS
 # ============================================================
 
-tab1, tab2, tab3, tab4 = st.tabs([
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "📊 Monthly Comparison",
     "📈 Anomaly",
     "🥧 Rainfall Category",
-    "📊 Histogram"
+    "📊 Histogram",
+    "📅 Yearly Analysis"
 ])
 
 # ============================================================
@@ -1125,6 +1126,284 @@ with tab4:
 
     ax.set_ylabel(
         "Frequency"
+    )
+
+    ax.grid(
+        axis="y",
+        linestyle="--",
+        alpha=0.4
+    )
+
+    ax.legend(
+        bbox_to_anchor=(1.02, 1),
+        loc="upper left",
+        borderaxespad=0
+    )
+
+    plt.tight_layout(
+        rect=[0, 0, 0.82, 1]
+    )
+
+    st.pyplot(
+        fig,
+        use_container_width=True
+    )
+
+    plt.close(fig)
+# ============================================================
+# TAB 5 - YEARLY ANALYSIS
+# ============================================================
+
+with tab5:
+
+    st.subheader(
+        "📅 Yearly Rainfall Analysis"
+    )
+
+    # --------------------------------------------------------
+    # YEARLY DATA
+    # --------------------------------------------------------
+
+    yearly1 = (
+        analysis1
+        .set_index("YEAR")
+        .reindex(common_years)
+    )
+
+    yearly2 = (
+        analysis2
+        .set_index("YEAR")
+        .reindex(common_years)
+    )
+
+    # --------------------------------------------------------
+    # YEARLY TOTAL
+    # --------------------------------------------------------
+
+    yearly_total1 = (
+        yearly1[MONTHS]
+        .sum(
+            axis=1,
+            skipna=True
+        )
+    )
+
+    yearly_total2 = (
+        yearly2[MONTHS]
+        .sum(
+            axis=1,
+            skipna=True
+        )
+    )
+
+    # --------------------------------------------------------
+    # YEARLY MEAN
+    # --------------------------------------------------------
+
+    yearly_mean1 = (
+        yearly1[MONTHS]
+        .mean(
+            axis=1,
+            skipna=True
+        )
+    )
+
+    yearly_mean2 = (
+        yearly2[MONTHS]
+        .mean(
+            axis=1,
+            skipna=True
+        )
+    )
+
+    # --------------------------------------------------------
+    # TABLE
+    # --------------------------------------------------------
+
+    yearly_table = pd.DataFrame({
+
+        "Year":
+            common_years,
+
+        f"{station1} Total (mm)":
+            yearly_total1.values,
+
+        f"{station2} Total (mm)":
+            yearly_total2.values,
+
+        "Total Difference (mm)":
+            (
+                yearly_total1.values
+                -
+                yearly_total2.values
+            ),
+
+        f"{station1} Mean (mm)":
+            yearly_mean1.values,
+
+        f"{station2} Mean (mm)":
+            yearly_mean2.values,
+
+        "Mean Difference (mm)":
+            (
+                yearly_mean1.values
+                -
+                yearly_mean2.values
+            )
+
+    })
+
+    st.dataframe(
+        yearly_table.round(2),
+        use_container_width=True,
+        hide_index=True
+    )
+
+    # ========================================================
+    # YEARLY TOTAL GRAPH
+    # ========================================================
+
+    st.subheader(
+        "📊 Yearly Total Rainfall"
+    )
+
+    fig, ax = plt.subplots(
+        figsize=(15, 7)
+    )
+
+    x = np.arange(
+        len(common_years)
+    )
+
+    bar_width = 0.35
+
+    bar1 = ax.bar(
+        x - bar_width / 2,
+        yearly_total1.values,
+        width=bar_width,
+        color="steelblue",
+        edgecolor="black",
+        label=station1
+    )
+
+    bar2 = ax.bar(
+        x + bar_width / 2,
+        yearly_total2.values,
+        width=bar_width,
+        color="darkorange",
+        edgecolor="black",
+        label=station2
+    )
+
+    # --------------------------------------------------------
+    # VALUE LABELS
+    # --------------------------------------------------------
+
+    for bars in [bar1, bar2]:
+
+        for bar in bars:
+
+            value = bar.get_height()
+
+            if pd.notna(value):
+
+                ax.annotate(
+                    f"{value:.1f}",
+                    (
+                        bar.get_x()
+                        + bar.get_width() / 2,
+                        value
+                    ),
+                    xytext=(0, 5),
+                    textcoords="offset points",
+                    ha="center",
+                    va="bottom",
+                    fontsize=8
+                )
+
+    ax.set_title(
+        "Yearly Total Rainfall",
+        fontsize=16,
+        fontweight="bold"
+    )
+
+    ax.set_xlabel("Year")
+
+    ax.set_ylabel(
+        "Total Rainfall (mm)"
+    )
+
+    ax.set_xticks(x)
+
+    ax.set_xticklabels(
+        common_years
+    )
+
+    ax.grid(
+        axis="y",
+        linestyle="--",
+        alpha=0.4
+    )
+
+    ax.legend(
+        bbox_to_anchor=(1.02, 1),
+        loc="upper left",
+        borderaxespad=0
+    )
+
+    plt.tight_layout(
+        rect=[0, 0, 0.82, 1]
+    )
+
+    st.pyplot(
+        fig,
+        use_container_width=True
+    )
+
+    plt.close(fig)
+
+    # ========================================================
+    # YEARLY MEAN GRAPH
+    # ========================================================
+
+    st.subheader(
+        "📈 Yearly Mean Monthly Rainfall"
+    )
+
+    fig, ax = plt.subplots(
+        figsize=(15, 7)
+    )
+
+    ax.plot(
+        common_years,
+        yearly_mean1.values,
+        marker="o",
+        linewidth=2.5,
+        label=station1
+    )
+
+    ax.plot(
+        common_years,
+        yearly_mean2.values,
+        marker="o",
+        linewidth=2.5,
+        label=station2
+    )
+
+    ax.set_title(
+        "Yearly Mean Monthly Rainfall",
+        fontsize=16,
+        fontweight="bold"
+    )
+
+    ax.set_xlabel("Year")
+
+    ax.set_ylabel(
+        "Mean Rainfall (mm)"
+    )
+
+    ax.set_xticks(
+        common_years
     )
 
     ax.grid(
