@@ -49,46 +49,45 @@ MONTHS = [
 ]
 
 # ============================================================
-# FUNCTION - READ RAINFALL FILE
+# FUNCTION - READ FILE 2
 # ============================================================
 
-def read_rainfall_file(
+def read_file2(
     uploaded_file,
-    start_col
+    station
 ):
 
-    # Read entire Excel without header
+    # --------------------------------------------------------
+    # File 2:
+    # B = YEAR
+    # C:N = JAN:DEC
+    # O = ANNUAL
+    # --------------------------------------------------------
+
     raw = pd.read_excel(
         uploaded_file,
-        header=None
+        sheet_name=station,
+        header=None,
+        usecols="B:O"
     )
 
     # --------------------------------------------------------
-    # CHECK NUMBER OF COLUMNS
+    # Header = row 6
+    # Data starts = row 7
     # --------------------------------------------------------
 
-    required_cols = start_col + 14
+    data = raw.iloc[6:].copy()
 
-    if raw.shape[1] < required_cols:
-
-        raise ValueError(
-            f"Fail hanya mempunyai {raw.shape[1]} kolum, "
-            f"tetapi sekurang-kurangnya {required_cols} kolum "
-            f"diperlukan."
-        )
     # --------------------------------------------------------
-    # SELECT COLUMNS
+    # Set column names
+    #
+    # B  = YEAR
+    # C  = JAN
+    # ...
+    # N  = DEC
+    # O  = ANNUAL
     # --------------------------------------------------------
 
-    data = raw.iloc[
-        :,
-        start_col:required_cols
-    ].copy()
-
-    # ========================================================
-    # SET COLUMN NAMES
-    # ========================================================
-    data = data.iloc[:, :14]
     data.columns = [
         "YEAR",
         "JAN",
@@ -106,9 +105,9 @@ def read_rainfall_file(
         "ANNUAL"
     ]
 
-    # ========================================================
-    # CONVERT YEAR
-    # ========================================================
+    # --------------------------------------------------------
+    # YEAR
+    # --------------------------------------------------------
 
     data["YEAR"] = pd.to_numeric(
         data["YEAR"],
@@ -116,8 +115,12 @@ def read_rainfall_file(
     )
 
     # --------------------------------------------------------
-    # KEEP VALID YEARS
+    # REMOVE NON-YEAR ROWS
     # --------------------------------------------------------
+
+    data = data[
+        data["YEAR"].notna()
+    ].copy()
 
     data = data[
         data["YEAR"].between(
@@ -126,9 +129,14 @@ def read_rainfall_file(
         )
     ].copy()
 
-    # ========================================================
-    # CONVERT MONTHS
-    # ========================================================
+    data["YEAR"] = (
+        data["YEAR"]
+        .astype(int)
+    )
+
+    # --------------------------------------------------------
+    # MONTHS
+    # --------------------------------------------------------
 
     for month in MONTHS:
 
@@ -137,26 +145,18 @@ def read_rainfall_file(
             errors="coerce"
         )
 
-    # ========================================================
-    # CONVERT ANNUAL
-    # ========================================================
+    # --------------------------------------------------------
+    # ANNUAL
+    # --------------------------------------------------------
 
     data["ANNUAL"] = pd.to_numeric(
         data["ANNUAL"],
         errors="coerce"
     )
-        # --------------------------------------------------------
-    # YEAR AS INTEGER
-    # --------------------------------------------------------
 
-    data["YEAR"] = (
-        data["YEAR"]
-        .astype(int)
-    )
-    
-    # ========================================================
+    # --------------------------------------------------------
     # REMOVE DUPLICATE YEARS
-    # ========================================================
+    # --------------------------------------------------------
 
     data = (
         data
