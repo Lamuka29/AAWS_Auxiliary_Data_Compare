@@ -580,31 +580,6 @@ with tab1:
         label=f"{station2} {target_year}"
     )
     # ========================================================
-    # MEAN VALUE LABELS
-    # ========================================================
-    
-    for bars in [bar1, bar2]:
-    
-        for bar in bars:
-    
-            value = bar.get_height()
-    
-            if pd.notna(value):
-    
-                ax.annotate(
-                    f"{value:.1f}",
-                    (
-                        bar.get_x()
-                        + bar.get_width() / 2,
-                        value
-                    ),
-                    xytext=(0, 5),
-                    textcoords="offset points",
-                    ha="center",
-                    va="bottom",
-                    fontsize=8
-                )
-    # ========================================================
     # TARGET YEAR VALUE LABELS
     # ========================================================
     
