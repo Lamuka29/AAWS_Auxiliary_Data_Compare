@@ -52,28 +52,43 @@ MONTHS = [
 # FUNCTION - READ RAINFALL FILE
 # ============================================================
 
-def read_rainfall_file(uploaded_file, start_col):
+def read_rainfall_file(
+    uploaded_file,
+    start_col
+):
 
+    # Read entire Excel without header
     raw = pd.read_excel(
         uploaded_file,
         header=None
     )
 
-    # ========================================================
-    # SELECT REQUIRED COLUMNS
-    #
-    # YEAR + 12 MONTHS + ANNUAL
-    # ========================================================
+    # --------------------------------------------------------
+    # CHECK NUMBER OF COLUMNS
+    # --------------------------------------------------------
+
+    required_cols = start_col + 14
+
+    if raw.shape[1] < required_cols:
+
+        raise ValueError(
+            f"Fail hanya mempunyai {raw.shape[1]} kolum, "
+            f"tetapi sekurang-kurangnya {required_cols} kolum "
+            f"diperlukan."
+        )
+    # --------------------------------------------------------
+    # SELECT COLUMNS
+    # --------------------------------------------------------
 
     data = raw.iloc[
         :,
-        start_col:start_col + 14
+        start_col:required_cols
     ].copy()
 
     # ========================================================
     # SET COLUMN NAMES
     # ========================================================
-
+    data = data.iloc[:, :14]
     data.columns = [
         "YEAR",
         "JAN",
@@ -100,24 +115,16 @@ def read_rainfall_file(uploaded_file, start_col):
         errors="coerce"
     )
 
-    # ========================================================
-    # REMOVE HEADER / TEXT / EMPTY ROWS
-    # ========================================================
+    # --------------------------------------------------------
+    # KEEP VALID YEARS
+    # --------------------------------------------------------
 
     data = data[
-        data["YEAR"].notna()
+        data["YEAR"].between(
+            1900,
+            2100
+        )
     ].copy()
-
-    data = data[
-        (data["YEAR"] >= 1900)
-        &
-        (data["YEAR"] <= 2100)
-    ].copy()
-
-    data["YEAR"] = (
-        data["YEAR"]
-        .astype(int)
-    )
 
     # ========================================================
     # CONVERT MONTHS
@@ -138,7 +145,15 @@ def read_rainfall_file(uploaded_file, start_col):
         data["ANNUAL"],
         errors="coerce"
     )
+        # --------------------------------------------------------
+    # YEAR AS INTEGER
+    # --------------------------------------------------------
 
+    data["YEAR"] = (
+        data["YEAR"]
+        .astype(int)
+    )
+    
     # ========================================================
     # REMOVE DUPLICATE YEARS
     # ========================================================
