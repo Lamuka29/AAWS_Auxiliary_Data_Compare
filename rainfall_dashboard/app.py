@@ -1044,8 +1044,12 @@ with tab3:
 with tab4:
 
     st.subheader(
-        "📊 Slight & Moderate Rainfall Histogram"
+        "📊 Rainfall Distribution by Category"
     )
+
+    # --------------------------------------------------------
+    # GET ALL RAINFALL VALUES
+    # --------------------------------------------------------
 
     values1 = (
         analysis1[MONTHS]
@@ -1059,6 +1063,7 @@ with tab4:
         .flatten()
     )
 
+    # Remove NaN
     values1 = values1[
         ~np.isnan(values1)
     ]
@@ -1067,65 +1072,168 @@ with tab4:
         ~np.isnan(values2)
     ]
 
-
     # --------------------------------------------------------
-    # SLIGHT + MODERATE ONLY
-    # 0.1–30.0 mm
+    # CATEGORY FUNCTION
     # --------------------------------------------------------
 
-    values1 = values1[
-        (values1 > 0) &
-        (values1 <= 30)
+    def rainfall_category(value):
+
+        if value == 0:
+            return "No Rain"
+
+        elif value <= 10:
+            return "Slight Rain"
+
+        elif value <= 30:
+            return "Moderate Rain"
+
+        elif value <= 60:
+            return "Heavy Rain"
+
+        else:
+            return "Very Heavy Rain"
+
+
+    # --------------------------------------------------------
+    # CLASSIFY DATA
+    # --------------------------------------------------------
+
+    categories1 = pd.Series(
+        values1
+    ).apply(
+        rainfall_category
+    )
+
+    categories2 = pd.Series(
+        values2
+    ).apply(
+        rainfall_category
+    )
+
+
+    # --------------------------------------------------------
+    # CATEGORY ORDER
+    # --------------------------------------------------------
+
+    rainfall_categories = [
+        "No Rain",
+        "Slight Rain",
+        "Moderate Rain",
+        "Heavy Rain",
+        "Very Heavy Rain"
     ]
 
-    values2 = values2[
-        (values2 > 0) &
-        (values2 <= 30)
-    ]
-
 
     # --------------------------------------------------------
-    # GRAPH
+    # COUNT
     # --------------------------------------------------------
+
+    count1 = (
+        categories1
+        .value_counts()
+        .reindex(
+            rainfall_categories,
+            fill_value=0
+        )
+    )
+
+    count2 = (
+        categories2
+        .value_counts()
+        .reindex(
+            rainfall_categories,
+            fill_value=0
+        )
+    )
+
+
+    # ========================================================
+    # HISTOGRAM / CATEGORY FREQUENCY
+    # ========================================================
 
     fig, ax = plt.subplots(
         figsize=(15, 8)
     )
 
-    bins = np.arange(
-        0,
-        32,
-        2
+    x = np.arange(
+        len(rainfall_categories)
     )
 
-    ax.hist(
-        values1,
-        bins=bins,
-        alpha=0.6,
+    bar_width = 0.35
+
+
+    bar1 = ax.bar(
+        x - bar_width / 2,
+        count1.values,
+        width=bar_width,
+        color="steelblue",
         edgecolor="black",
         label=station1
     )
 
-    ax.hist(
-        values2,
-        bins=bins,
-        alpha=0.6,
+    bar2 = ax.bar(
+        x + bar_width / 2,
+        count2.values,
+        width=bar_width,
+        color="darkorange",
         edgecolor="black",
         label=station2
     )
 
+
+    # --------------------------------------------------------
+    # VALUE LABELS
+    # --------------------------------------------------------
+
+    for bars in [
+        bar1,
+        bar2
+    ]:
+
+        for bar in bars:
+
+            value = bar.get_height()
+
+            ax.annotate(
+                f"{int(value)}",
+                (
+                    bar.get_x()
+                    + bar.get_width() / 2,
+                    value
+                ),
+                xytext=(0, 5),
+                textcoords="offset points",
+                ha="center",
+                va="bottom",
+                fontsize=9
+            )
+
+
+    # --------------------------------------------------------
+    # GRAPH SETTINGS
+    # --------------------------------------------------------
+
     ax.set_title(
-        "Distribution of Slight and Moderate Rainfall",
+        "Rainfall Distribution by Category",
         fontsize=16,
         fontweight="bold"
     )
 
     ax.set_xlabel(
-        "Rainfall (mm)"
+        "Rainfall Category"
     )
 
     ax.set_ylabel(
         "Frequency"
+    )
+
+    ax.set_xticks(
+        x
+    )
+
+    ax.set_xticklabels(
+        rainfall_categories,
+        rotation=15
     )
 
     ax.grid(
@@ -1134,15 +1242,13 @@ with tab4:
         alpha=0.4
     )
 
+    # Legend outside graph
     ax.legend(
         bbox_to_anchor=(1.02, 1),
-        loc="upper left",
-        borderaxespad=0
+        loc="upper left"
     )
 
-    plt.tight_layout(
-        rect=[0, 0, 0.82, 1]
-    )
+    plt.tight_layout()
 
     st.pyplot(
         fig,
@@ -1150,6 +1256,34 @@ with tab4:
     )
 
     plt.close(fig)
+
+
+    # ========================================================
+    # CATEGORY TABLE
+    # ========================================================
+
+    st.subheader(
+        "📋 Rainfall Category Frequency"
+    )
+
+    category_table = pd.DataFrame({
+
+        "Rainfall Category":
+            rainfall_categories,
+
+        f"{station1} Frequency":
+            count1.values,
+
+        f"{station2} Frequency":
+            count2.values
+
+    })
+
+    st.dataframe(
+        category_table,
+        use_container_width=True,
+        hide_index=True
+    )
 # ============================================================
 # TAB 5 - YEARLY COMPARISON
 # ============================================================
