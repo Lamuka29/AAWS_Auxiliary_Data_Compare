@@ -489,10 +489,9 @@ target_year = st.selectbox(
 # ANALYSIS TABS
 # ============================================================
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4 = st.tabs([
     "📊 Monthly Comparison",
     "📈 Anomaly",
-    "🥧 Rainfall Category",
     "📊 Histogram",
     "📅 Yearly Analysis"
 ])
@@ -904,10 +903,10 @@ with tab2:
         hide_index=True
     )
 # ============================================================
-# TAB 4 - HISTOGRAM
+# TAB 3 - HISTOGRAM
 # ============================================================
 
-with tab4:
+with tab3:
 
     st.subheader(
         "📊 Rainfall Data Distribution by Category"
@@ -1146,10 +1145,10 @@ with tab4:
         hide_index=True
     )
 # ============================================================
-# TAB 5 - YEARLY COMPARISON
+# TAB 4 - YEARLY COMPARISON
 # ============================================================
 
-with tab5:
+with tab4:
 
     st.subheader(
         "📅 Yearly Rainfall Comparison"
