@@ -40,170 +40,43 @@ st.title(
 
 st.markdown(
     """
-    Aplikasi ini membandingkan **dua fail data hujan bulanan**
+    Perbandingan data hujan bulanan antara **dua fail**
     bagi stesen dan tahun yang sama.
-
-    **File 1 vs File 2**
-    - Mean Monthly Rainfall
-    - Target Year Monthly Rainfall
-    - Difference antara kedua-dua fail
     """
 )
 
 
 # ============================================================
-# FUNCTION - READ FILE 1
+# FUNCTION - FILE 1
 # ============================================================
 
 def read_file1(
-    uploaded_file,
-    year
-):
-
-    # --------------------------------------------------------
-    # FILE 1 STRUCTURE
-    #
-    # A = YEAR
-    # B:M = JAN:DEC
-    # N = ANNUAL
-    #
-    # Header = row 10
-    # Data = row 11 onwards
-    # --------------------------------------------------------
-
-    raw = pd.read_excel(
-        uploaded_file,
-        sheet_name=str(year),
-        header=None,
-        usecols="A:N"
-    )
-
-    # --------------------------------------------------------
-    # DATA STARTS ROW 11
-    # Python index = 10
-    # --------------------------------------------------------
-
-    data = raw.iloc[10:].copy()
-
-    # --------------------------------------------------------
-    # SET COLUMN NAMES
-    # --------------------------------------------------------
-
-    data.columns = [
-        "YEAR",
-        "JAN",
-        "FEB",
-        "MAR",
-        "APR",
-        "MAY",
-        "JUN",
-        "JUL",
-        "AUG",
-        "SEP",
-        "OCT",
-        "NOV",
-        "DEC",
-        "ANNUAL"
-    ]
-
-    # --------------------------------------------------------
-    # CONVERT NUMERIC
-    # --------------------------------------------------------
-
-    for column in [
-        "YEAR",
-        *MONTHS,
-        "ANNUAL"
-    ]:
-
-        data[column] = pd.to_numeric(
-            data[column],
-            errors="coerce"
-        )
-
-    # --------------------------------------------------------
-    # KEEP VALID YEAR
-    # --------------------------------------------------------
-
-    data = data[
-        data["YEAR"].notna()
-    ].copy()
-
-    data = data[
-        data["YEAR"].between(
-            1900,
-            2100
-        )
-    ].copy()
-
-    data["YEAR"] = (
-        data["YEAR"]
-        .astype(int)
-    )
-
-    # --------------------------------------------------------
-    # FILE 1 SHEET REPRESENTS ONE YEAR
-    #
-    # Calculate monthly total from daily data
-    # --------------------------------------------------------
-
-    monthly_total = (
-        data[MONTHS]
-        .sum(
-            axis=0,
-            skipna=True
-        )
-        .reindex(MONTHS)
-    )
-
-    annual_total = (
-        monthly_total.sum()
-    )
-
-    return {
-        "YEAR": year,
-        "MONTHLY": monthly_total,
-        "ANNUAL": annual_total
-    }
-
-
-# ============================================================
-# FUNCTION - READ FILE 2
-# ============================================================
-
-def read_file2(
     uploaded_file,
     station
 ):
 
     # --------------------------------------------------------
-    # FILE 2 STRUCTURE
+    # FILE 1
     #
-    # B = YEAR
-    # C:N = JAN:DEC
-    # O = ANNUAL
+    # Sheet = Station
+    # A = YEAR
+    # B:M = JAN:DEC
+    # N = ANNUAL
     #
-    # Header = row 6
-    # Data = row 7 onwards
+    # Table starts around row 9/10
+    # Header = row 10
+    # Data = row 11
     # --------------------------------------------------------
 
     raw = pd.read_excel(
         uploaded_file,
         sheet_name=station,
         header=None,
-        usecols="B:O"
+        usecols="A:N"
     )
 
-    # --------------------------------------------------------
-    # DATA STARTS ROW 7
-    # Python index = 6
-    # --------------------------------------------------------
-
-    data = raw.iloc[6:].copy()
-
-    # --------------------------------------------------------
-    # SET COLUMN NAMES
-    # --------------------------------------------------------
+    # Data starts row 11
+    data = raw.iloc[10:].copy()
 
     data.columns = [
         "YEAR",
@@ -223,7 +96,7 @@ def read_file2(
     ]
 
     # --------------------------------------------------------
-    # CONVERT YEAR
+    # YEAR
     # --------------------------------------------------------
 
     data["YEAR"] = pd.to_numeric(
@@ -231,15 +104,6 @@ def read_file2(
         errors="coerce"
     )
 
-    # --------------------------------------------------------
-    # REMOVE NON-YEAR ROWS
-    #
-    # This automatically removes:
-    # Average
-    # blank rows
-    # headers
-    # --------------------------------------------------------
-
     data = data[
         data["YEAR"].notna()
     ].copy()
@@ -257,7 +121,7 @@ def read_file2(
     )
 
     # --------------------------------------------------------
-    # CONVERT MONTHS
+    # MONTHS
     # --------------------------------------------------------
 
     for month in MONTHS:
@@ -268,7 +132,7 @@ def read_file2(
         )
 
     # --------------------------------------------------------
-    # CONVERT ANNUAL
+    # ANNUAL
     # --------------------------------------------------------
 
     data["ANNUAL"] = pd.to_numeric(
@@ -277,7 +141,7 @@ def read_file2(
     )
 
     # --------------------------------------------------------
-    # REMOVE DUPLICATE YEARS
+    # REMOVE DUPLICATES
     # --------------------------------------------------------
 
     data = (
@@ -294,7 +158,118 @@ def read_file2(
 
 
 # ============================================================
-# FILE UPLOAD
+# FUNCTION - FILE 2
+# ============================================================
+
+def read_file2(
+    uploaded_file,
+    station
+):
+
+    # --------------------------------------------------------
+    # FILE 2
+    #
+    # Sheet = Station
+    # B = YEAR
+    # C:N = JAN:DEC
+    # O = ANNUAL
+    #
+    # Table starts around B5:O5/6
+    # Header = row 6
+    # Data = row 7
+    # --------------------------------------------------------
+
+    raw = pd.read_excel(
+        uploaded_file,
+        sheet_name=station,
+        header=None,
+        usecols="B:O"
+    )
+
+    # Data starts row 7
+    data = raw.iloc[6:].copy()
+
+    data.columns = [
+        "YEAR",
+        "JAN",
+        "FEB",
+        "MAR",
+        "APR",
+        "MAY",
+        "JUN",
+        "JUL",
+        "AUG",
+        "SEP",
+        "OCT",
+        "NOV",
+        "DEC",
+        "ANNUAL"
+    ]
+
+    # --------------------------------------------------------
+    # YEAR
+    # --------------------------------------------------------
+
+    data["YEAR"] = pd.to_numeric(
+        data["YEAR"],
+        errors="coerce"
+    )
+
+    data = data[
+        data["YEAR"].notna()
+    ].copy()
+
+    data = data[
+        data["YEAR"].between(
+            1900,
+            2100
+        )
+    ].copy()
+
+    data["YEAR"] = (
+        data["YEAR"]
+        .astype(int)
+    )
+
+    # --------------------------------------------------------
+    # MONTHS
+    # --------------------------------------------------------
+
+    for month in MONTHS:
+
+        data[month] = pd.to_numeric(
+            data[month],
+            errors="coerce"
+        )
+
+    # --------------------------------------------------------
+    # ANNUAL
+    # --------------------------------------------------------
+
+    data["ANNUAL"] = pd.to_numeric(
+        data["ANNUAL"],
+        errors="coerce"
+    )
+
+    # --------------------------------------------------------
+    # REMOVE DUPLICATES
+    # --------------------------------------------------------
+
+    data = (
+        data
+        .drop_duplicates(
+            subset="YEAR",
+            keep="first"
+        )
+        .sort_values("YEAR")
+        .reset_index(drop=True)
+    )
+
+    return data
+
+
+# ============================================================
+# UPLOAD FILES
 # ============================================================
 
 st.subheader(
@@ -314,28 +289,23 @@ with col1:
 with col2:
 
     file2 = st.file_uploader(
-        "File 2 - Monthly Rainfall",
+        "File 2 - Monthly/Yearly Rainfall",
         type=["xlsx", "xls"],
         key="file2"
     )
 
 
-# ============================================================
-# CHECK FILES
-# ============================================================
-
 if file1 is None or file2 is None:
 
     st.info(
-        "⬆️ Sila upload kedua-dua fail "
-        "untuk memulakan analisis."
+        "⬆️ Sila upload kedua-dua fail."
     )
 
     st.stop()
 
 
 # ============================================================
-# READ EXCEL FILES
+# READ EXCEL
 # ============================================================
 
 try:
@@ -354,57 +324,27 @@ except Exception as e:
 
 
 # ============================================================
-# GET YEARS FROM FILE 1
+# STATION LIST
 # ============================================================
 
-file1_years = []
+stations1 = excel1.sheet_names
 
-for sheet in excel1.sheet_names:
-
-    try:
-
-        year = int(
-            str(sheet).strip()
-        )
-
-        if 1900 <= year <= 2100:
-
-            file1_years.append(year)
-
-    except:
-
-        continue
+stations2 = excel2.sheet_names
 
 
-file1_years = sorted(
-    set(file1_years)
-)
-
-
-if not file1_years:
+if not stations1:
 
     st.error(
-        "❌ Tiada sheet tahun dijumpai "
-        "dalam File 1."
+        "❌ Tiada stesen dalam File 1."
     )
 
     st.stop()
 
 
-# ============================================================
-# GET STATIONS FROM FILE 2
-# ============================================================
-
-file2_stations = (
-    excel2.sheet_names
-)
-
-
-if not file2_stations:
+if not stations2:
 
     st.error(
-        "❌ Tiada sheet stesen dijumpai "
-        "dalam File 2."
+        "❌ Tiada stesen dalam File 2."
     )
 
     st.stop()
@@ -414,50 +354,64 @@ if not file2_stations:
 # SELECT STATION
 # ============================================================
 
-station = st.selectbox(
-    "📍 Select Station",
-    file2_stations,
-    key="station"
-)
+col1, col2 = st.columns(2)
+
+with col1:
+
+    station1 = st.selectbox(
+        "📍 File 1 - Station",
+        stations1,
+        key="station1"
+    )
+
+with col2:
+
+    station2 = st.selectbox(
+        "📍 File 2 - Station",
+        stations2,
+        key="station2"
+    )
 
 
 # ============================================================
-# READ FILE 2
+# READ SELECTED STATIONS
 # ============================================================
 
 try:
 
+    data1 = read_file1(
+        file1,
+        station1
+    )
+
     data2 = read_file2(
         file2,
-        station
+        station2
     )
 
 except Exception as e:
 
     st.error(
-        f"❌ Gagal membaca File 2: {e}"
+        f"❌ Gagal membaca fail: {e}"
     )
 
     st.stop()
 
 
 # ============================================================
-# GET YEARS FROM FILE 2
-# ============================================================
-
-file2_years = sorted(
-    data2["YEAR"]
-    .unique()
-)
-
-
-# ============================================================
 # COMMON YEARS
 # ============================================================
 
+years1 = set(
+    data1["YEAR"]
+)
+
+years2 = set(
+    data2["YEAR"]
+)
+
 common_years = sorted(
-    set(file1_years)
-    .intersection(file2_years)
+    years1.intersection(years2)
 )
 
 
@@ -465,7 +419,7 @@ if not common_years:
 
     st.error(
         "❌ Tiada tahun yang sama "
-        "antara File 1 dan File 2."
+        "antara kedua-dua stesen."
     )
 
     st.stop()
@@ -476,7 +430,8 @@ if not common_years:
 # ============================================================
 
 st.success(
-    f"📍 Station: {station} | "
+    f"📍 File 1: {station1} | "
+    f"File 2: {station2} | "
     f"Years: {common_years[0]}–"
     f"{common_years[-1]}"
 )
@@ -494,163 +449,14 @@ target_year = st.selectbox(
 
 
 # ============================================================
-# READ FILE 1 - ALL SHEETS
+# FILTER COMMON YEARS
 # ============================================================
 
-file1_data = {}
-
-
-for sheet in excel1.sheet_names:
-
-    try:
-
-        raw = pd.read_excel(
-            file1,
-            sheet_name=sheet,
-            header=None,
-            usecols="A:N"
-        )
-
-        # ----------------------------------------------------
-        # DATA STARTS ROW 11
-        # ----------------------------------------------------
-
-        data = raw.iloc[10:].copy()
-
-        data.columns = [
-            "YEAR",
-            "JAN",
-            "FEB",
-            "MAR",
-            "APR",
-            "MAY",
-            "JUN",
-            "JUL",
-            "AUG",
-            "SEP",
-            "OCT",
-            "NOV",
-            "DEC",
-            "ANNUAL"
-        ]
-
-        # ----------------------------------------------------
-        # CONVERT YEAR
-        # ----------------------------------------------------
-
-        data["YEAR"] = pd.to_numeric(
-            data["YEAR"],
-            errors="coerce"
-        )
-
-        data = data[
-            data["YEAR"].notna()
-        ].copy()
-
-        data = data[
-            data["YEAR"].between(
-                1900,
-                2100
-            )
-        ].copy()
-
-        if data.empty:
-            continue
-
-        data["YEAR"] = (
-            data["YEAR"]
-            .astype(int)
-        )
-
-        # ----------------------------------------------------
-        # CONVERT MONTHS
-        # ----------------------------------------------------
-
-        for month in MONTHS:
-
-            data[month] = pd.to_numeric(
-                data[month],
-                errors="coerce"
-            )
-
-        # ----------------------------------------------------
-        # MONTHLY TOTAL
-        # ----------------------------------------------------
-
-        monthly_total = (
-            data[MONTHS]
-            .sum(
-                axis=0,
-                skipna=True
-            )
-            .reindex(MONTHS)
-        )
-
-        year = int(
-            data["YEAR"].iloc[0]
-        )
-
-        file1_data[year] = {
-            "MONTHLY": monthly_total,
-            "ANNUAL": monthly_total.sum(),
-            "SHEET": sheet
-        }
-
-    except Exception:
-        continue
-
-
-# ============================================================
-# CHECK FILE 1
-# ============================================================
-
-file1_years = sorted(
-    file1_data.keys()
-)
-
-
-if not file1_years:
-
-    st.error(
-        "❌ Tiada data YEAR dijumpai dalam File 1."
+analysis1 = data1[
+    data1["YEAR"].isin(
+        common_years
     )
-
-    st.stop()
-
-
-# ============================================================
-# CREATE FILE 1 TABLE
-# ============================================================
-
-file1_table = pd.DataFrame(
-    {
-        year:
-        file1_results[year]["MONTHLY"]
-        for year in file1_results
-    }
-).T
-
-
-file1_table.index.name = "YEAR"
-
-
-# ============================================================
-# FILE 1 MEAN
-# ============================================================
-
-mean1 = (
-    file1_table[MONTHS]
-    .mean(
-        axis=0,
-        skipna=True
-    )
-    .reindex(MONTHS)
-)
-
-
-# ============================================================
-# FILE 2 ANALYSIS
-# ============================================================
+].copy()
 
 analysis2 = data2[
     data2["YEAR"].isin(
@@ -660,8 +466,17 @@ analysis2 = data2[
 
 
 # ============================================================
-# FILE 2 MEAN
+# MEAN MONTHLY RAINFALL
 # ============================================================
+
+mean1 = (
+    analysis1[MONTHS]
+    .mean(
+        axis=0,
+        skipna=True
+    )
+    .reindex(MONTHS)
+)
 
 mean2 = (
     analysis2[MONTHS]
@@ -674,26 +489,21 @@ mean2 = (
 
 
 # ============================================================
-# TARGET YEAR - FILE 1
+# TARGET YEAR
 # ============================================================
 
 target1 = (
-    file1_table
-    .loc[
-        target_year,
-        MONTHS
+    analysis1[
+        analysis1["YEAR"]
+        == target_year
     ]
+    .iloc[0][MONTHS]
     .reindex(MONTHS)
 )
 
-
-# ============================================================
-# TARGET YEAR - FILE 2
-# ============================================================
-
 target2 = (
-    data2[
-        data2["YEAR"]
+    analysis2[
+        analysis2["YEAR"]
         == target_year
     ]
     .iloc[0][MONTHS]
@@ -708,7 +518,6 @@ target2 = (
 mean_difference = (
     mean1 - mean2
 )
-
 
 target_difference = (
     target1 - target2
@@ -767,9 +576,9 @@ x = np.arange(
 bar_width = 0.32
 
 
-# ============================================================
-# MEAN BARS
-# ============================================================
+# ------------------------------------------------------------
+# MEAN
+# ------------------------------------------------------------
 
 bar1 = ax.bar(
     x - bar_width / 2,
@@ -777,7 +586,7 @@ bar1 = ax.bar(
     width=bar_width,
     color="steelblue",
     edgecolor="black",
-    label="File 1 Mean"
+    label=f"{station1} Mean"
 )
 
 bar2 = ax.bar(
@@ -786,13 +595,13 @@ bar2 = ax.bar(
     width=bar_width,
     color="darkorange",
     edgecolor="black",
-    label="File 2 Mean"
+    label=f"{station2} Mean"
 )
 
 
-# ============================================================
-# TARGET YEAR LINES
-# ============================================================
+# ------------------------------------------------------------
+# TARGET YEAR
+# ------------------------------------------------------------
 
 ax.plot(
     x,
@@ -801,7 +610,7 @@ ax.plot(
     marker="o",
     linewidth=2.5,
     markersize=7,
-    label=f"File 1 {target_year}"
+    label=f"{station1} {target_year}"
 )
 
 ax.plot(
@@ -811,12 +620,12 @@ ax.plot(
     marker="o",
     linewidth=2.5,
     markersize=7,
-    label=f"File 2 {target_year}"
+    label=f"{station2} {target_year}"
 )
 
 
 # ============================================================
-# BAR VALUE LABELS
+# BAR LABELS
 # ============================================================
 
 for bars in [
@@ -846,7 +655,7 @@ for bars in [
 
 
 # ============================================================
-# LINE VALUE LABELS
+# LINE LABELS
 # ============================================================
 
 for values in [
@@ -878,9 +687,8 @@ for values in [
 # ============================================================
 
 ax.set_title(
-    f"{station}\n"
-    f"Mean Monthly Rainfall vs "
-    f"Target Year {target_year}",
+    f"Monthly Rainfall Comparison\n"
+    f"{station1} vs {station2}",
     fontsize=16,
     fontweight="bold"
 )
@@ -935,19 +743,19 @@ comparison = pd.DataFrame({
     "Month":
         MONTHS,
 
-    "File 1 Mean (mm)":
+    f"{station1} Mean (mm)":
         mean1.values,
 
-    "File 2 Mean (mm)":
+    f"{station2} Mean (mm)":
         mean2.values,
 
     "Mean Difference (mm)":
         mean_difference.values,
 
-    f"File 1 {target_year} (mm)":
+    f"{station1} {target_year} (mm)":
         target1.values,
 
-    f"File 2 {target_year} (mm)":
+    f"{station2} {target_year} (mm)":
         target2.values,
 
     "Target Difference (mm)":
@@ -971,33 +779,22 @@ st.subheader(
     "📊 Annual Rainfall Comparison"
 )
 
-annual1 = []
-
-for year in common_years:
-
-    annual1.append(
-        file1_results[year]["ANNUAL"]
-    )
-
-
-annual2 = (
-    analysis2
-    .set_index("YEAR")
-    .reindex(common_years)["ANNUAL"]
-    .values
-)
-
-
 annual_comparison = pd.DataFrame({
 
     "Year":
         common_years,
 
-    "File 1 Annual (mm)":
-        annual1,
+    f"{station1} Annual (mm)":
+        analysis1
+        .set_index("YEAR")
+        .reindex(common_years)["ANNUAL"]
+        .values,
 
-    "File 2 Annual (mm)":
-        annual2
+    f"{station2} Annual (mm)":
+        analysis2
+        .set_index("YEAR")
+        .reindex(common_years)["ANNUAL"]
+        .values
 
 })
 
@@ -1006,11 +803,11 @@ annual_comparison[
     "Difference (mm)"
 ] = (
     annual_comparison[
-        "File 1 Annual (mm)"
+        f"{station1} Annual (mm)"
     ]
     -
     annual_comparison[
-        "File 2 Annual (mm)"
+        f"{station2} Annual (mm)"
     ]
 )
 
