@@ -1,7 +1,3 @@
-# ============================================================
-# MONTHLY RAINFALL FILE COMPARISON
-# ============================================================
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -447,6 +443,16 @@ target_year = st.selectbox(
     index=len(common_years) - 1
 )
 
+# ============================================================
+# ANALYSIS TABS
+# ============================================================
+
+tab1, tab2, tab3, tab4 = st.tabs([
+    "📊 Monthly Comparison",
+    "📈 Anomaly",
+    "🥧 Rainfall Category",
+    "📊 Histogram"
+])
 
 # ============================================================
 # FILTER COMMON YEARS
@@ -523,7 +529,464 @@ target_difference = (
     target1 - target2
 )
 
+# ============================================================
+# TAB 1 - MONTHLY COMPARISON
+# ============================================================
 
+with tab1:
+
+    st.subheader(
+        "📊 Monthly Rainfall Comparison"
+    )
+
+    fig, ax = plt.subplots(
+        figsize=(15, 8)
+    )
+
+    x = np.arange(len(MONTHS))
+
+    bar_width = 0.32
+
+    bar1 = ax.bar(
+        x - bar_width / 2,
+        mean1.values,
+        width=bar_width,
+        color="steelblue",
+        edgecolor="black",
+        label=f"{station1} Mean"
+    )
+
+    bar2 = ax.bar(
+        x + bar_width / 2,
+        mean2.values,
+        width=bar_width,
+        color="darkorange",
+        edgecolor="black",
+        label=f"{station2} Mean"
+    )
+
+    ax.plot(
+        x,
+        target1.values,
+        color="navy",
+        marker="o",
+        linewidth=2.5,
+        label=f"{station1} {target_year}"
+    )
+
+    ax.plot(
+        x,
+        target2.values,
+        color="crimson",
+        marker="o",
+        linewidth=2.5,
+        label=f"{station2} {target_year}"
+    )
+
+    ax.set_title(
+        f"{station1} vs {station2}\n"
+        f"Mean Monthly Rainfall vs {target_year}",
+        fontsize=16,
+        fontweight="bold"
+    )
+
+    ax.set_xlabel("Month")
+
+    ax.set_ylabel("Rainfall (mm)")
+
+    ax.set_xticks(x)
+
+    ax.set_xticklabels(MONTHS)
+
+    ax.grid(
+        axis="y",
+        linestyle="--",
+        alpha=0.4
+    )
+
+    ax.legend()
+
+    plt.tight_layout()
+
+    st.pyplot(
+        fig,
+        use_container_width=True
+    )
+
+    plt.close(fig)
+
+
+    # --------------------------------------------------------
+    # TABLE
+    # --------------------------------------------------------
+
+    comparison = pd.DataFrame({
+
+        "Month":
+            MONTHS,
+
+        f"{station1} Mean (mm)":
+            mean1.values,
+
+        f"{station2} Mean (mm)":
+            mean2.values,
+
+        "Mean Difference (mm)":
+            mean_difference.values,
+
+        f"{station1} {target_year} (mm)":
+            target1.values,
+
+        f"{station2} {target_year} (mm)":
+            target2.values,
+
+        "Target Difference (mm)":
+            target_difference.values
+
+    })
+
+    st.dataframe(
+        comparison.round(2),
+        use_container_width=True,
+        hide_index=True
+    )
+# ============================================================
+# TAB 2 - ANOMALY
+# ============================================================
+
+with tab2:
+
+    st.subheader(
+        f"📈 Rainfall Anomaly - {target_year}"
+    )
+
+    anomaly_table = pd.DataFrame({
+
+        "Month":
+            MONTHS,
+
+        f"{station1} Anomaly (%)":
+            anomaly1.values,
+
+        f"{station2} Anomaly (%)":
+            anomaly2.values
+
+    })
+
+    st.dataframe(
+        anomaly_table.round(2),
+        use_container_width=True,
+        hide_index=True
+    )
+
+
+    # --------------------------------------------------------
+    # ANOMALY GRAPH
+    # --------------------------------------------------------
+
+    fig, ax = plt.subplots(
+        figsize=(15, 7)
+    )
+
+    x = np.arange(
+        len(MONTHS)
+    )
+
+    ax.axhline(
+        0,
+        linestyle="--",
+        linewidth=1
+    )
+
+    ax.plot(
+        x,
+        anomaly1.values,
+        marker="o",
+        linewidth=2.5,
+        label=station1
+    )
+
+    ax.plot(
+        x,
+        anomaly2.values,
+        marker="o",
+        linewidth=2.5,
+        label=station2
+    )
+
+    ax.set_title(
+        f"Monthly Rainfall Anomaly - {target_year}",
+        fontsize=16,
+        fontweight="bold"
+    )
+
+    ax.set_xlabel("Month")
+
+    ax.set_ylabel(
+        "Anomaly (%)"
+    )
+
+    ax.set_xticks(x)
+
+    ax.set_xticklabels(MONTHS)
+
+    ax.grid(
+        axis="y",
+        linestyle="--",
+        alpha=0.4
+    )
+
+    ax.legend()
+
+    plt.tight_layout()
+
+    st.pyplot(
+        fig,
+        use_container_width=True
+    )
+
+    plt.close(fig)
+# ============================================================
+# TAB 3 - RAINFALL CATEGORY
+# ============================================================
+
+with tab3:
+
+    st.subheader(
+        f"🥧 Rainfall Category - {target_year}"
+    )
+
+    def rainfall_category(value):
+
+        if pd.isna(value):
+            return np.nan
+
+        if value == 0:
+            return "No Rain"
+
+        elif value <= 10:
+            return "Slight Rain"
+
+        elif value <= 30:
+            return "Moderate Rain"
+
+        elif value <= 60:
+            return "Heavy Rain"
+
+        else:
+            return "Very Heavy Rain"
+
+
+    category1 = pd.Series(
+        target1.values
+    ).apply(
+        rainfall_category
+    )
+
+    category2 = pd.Series(
+        target2.values
+    ).apply(
+        rainfall_category
+    )
+
+
+    pie_categories = [
+        "Slight Rain",
+        "Moderate Rain",
+        "Heavy Rain",
+        "Very Heavy Rain"
+    ]
+
+
+    count1 = (
+        category1
+        .value_counts()
+        .reindex(
+            pie_categories,
+            fill_value=0
+        )
+    )
+
+    count2 = (
+        category2
+        .value_counts()
+        .reindex(
+            pie_categories,
+            fill_value=0
+        )
+    )
+
+
+    col1, col2 = st.columns(2)
+
+
+    # --------------------------------------------------------
+    # STATION 1
+    # --------------------------------------------------------
+
+    with col1:
+
+        fig1, ax1 = plt.subplots(
+            figsize=(6, 6)
+        )
+
+        if count1.sum() > 0:
+
+            ax1.pie(
+                count1.values,
+                labels=count1.index,
+                autopct="%1.1f%%",
+                startangle=90
+            )
+
+        ax1.set_title(
+            station1
+        )
+
+        st.pyplot(
+            fig1,
+            use_container_width=True
+        )
+
+        plt.close(fig1)
+
+
+    # --------------------------------------------------------
+    # STATION 2
+    # --------------------------------------------------------
+
+    with col2:
+
+        fig2, ax2 = plt.subplots(
+            figsize=(6, 6)
+        )
+
+        if count2.sum() > 0:
+
+            ax2.pie(
+                count2.values,
+                labels=count2.index,
+                autopct="%1.1f%%",
+                startangle=90
+            )
+
+        ax2.set_title(
+            station2
+        )
+
+        st.pyplot(
+            fig2,
+            use_container_width=True
+        )
+
+        plt.close(fig2)
+# ============================================================
+# TAB 4 - HISTOGRAM
+# ============================================================
+
+with tab4:
+
+    st.subheader(
+        "📊 Slight & Moderate Rainfall Histogram"
+    )
+
+    values1 = (
+        analysis1[MONTHS]
+        .values
+        .flatten()
+    )
+
+    values2 = (
+        analysis2[MONTHS]
+        .values
+        .flatten()
+    )
+
+    values1 = values1[
+        ~np.isnan(values1)
+    ]
+
+    values2 = values2[
+        ~np.isnan(values2)
+    ]
+
+
+    # --------------------------------------------------------
+    # SLIGHT + MODERATE ONLY
+    # 0.1–30.0 mm
+    # --------------------------------------------------------
+
+    values1 = values1[
+        (values1 > 0) &
+        (values1 <= 30)
+    ]
+
+    values2 = values2[
+        (values2 > 0) &
+        (values2 <= 30)
+    ]
+
+
+    # --------------------------------------------------------
+    # GRAPH
+    # --------------------------------------------------------
+
+    fig, ax = plt.subplots(
+        figsize=(15, 8)
+    )
+
+    bins = np.arange(
+        0,
+        32,
+        2
+    )
+
+    ax.hist(
+        values1,
+        bins=bins,
+        alpha=0.6,
+        edgecolor="black",
+        label=station1
+    )
+
+    ax.hist(
+        values2,
+        bins=bins,
+        alpha=0.6,
+        edgecolor="black",
+        label=station2
+    )
+
+    ax.set_title(
+        "Distribution of Slight and Moderate Rainfall",
+        fontsize=16,
+        fontweight="bold"
+    )
+
+    ax.set_xlabel(
+        "Rainfall (mm)"
+    )
+
+    ax.set_ylabel(
+        "Frequency"
+    )
+
+    ax.grid(
+        axis="y",
+        linestyle="--",
+        alpha=0.4
+    )
+
+    ax.legend()
+
+    plt.tight_layout()
+
+    st.pyplot(
+        fig,
+        use_container_width=True
+    )
+
+    plt.close(fig)
 # ============================================================
 # SUMMARY
 # ============================================================
