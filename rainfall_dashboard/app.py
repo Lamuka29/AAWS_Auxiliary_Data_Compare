@@ -23,7 +23,29 @@ MONTHS = [
     "MAY", "JUN", "JUL", "AUG",
     "SEP", "OCT", "NOV", "DEC"
 ]
+# ============================================================
+# FUNCTION - GET STATION NAME FROM FILE 1
+# ============================================================
 
+def get_station_name(
+    uploaded_file,
+    sheet_name
+):
+
+    raw = pd.read_excel(
+        uploaded_file,
+        sheet_name=sheet_name,
+        header=None,
+        usecols="B",
+        nrows=4
+    )
+
+    station_name = raw.iloc[3, 0]
+
+    if pd.isna(station_name):
+        return sheet_name
+
+    return str(station_name).strip()
 
 # ============================================================
 # TITLE
@@ -322,29 +344,50 @@ except Exception as e:
 # STATION LIST
 # ============================================================
 
-stations1 = excel1.sheet_names
-
-stations2 = excel2.sheet_names
-
-
-if not stations1:
-
-    st.error(
-        "❌ Tiada stesen dalam File 1."
-    )
-
-    st.stop()
+sheets1 = excel1.sheet_names
+sheets2 = excel2.sheet_names
 
 
-if not stations2:
+# ------------------------------------------------------------
+# FILE 1
+# Station name is stored in B4
+# ------------------------------------------------------------
 
-    st.error(
-        "❌ Tiada stesen dalam File 2."
-    )
+station_map1 = {}
 
-    st.stop()
+for sheet in sheets1:
+
+    try:
+
+        station_name = get_station_name(
+            file1,
+            sheet
+        )
+
+        station_map1[station_name] = sheet
+
+    except Exception:
+        continue
 
 
+# ------------------------------------------------------------
+# FILE 2
+# Station name = sheet name
+# ------------------------------------------------------------
+
+station_map2 = {
+    sheet: sheet
+    for sheet in sheets2
+}
+
+
+stations1 = list(
+    station_map1.keys()
+)
+
+stations2 = list(
+    station_map2.keys()
+)
 # ============================================================
 # SELECT STATION
 # ============================================================
@@ -376,7 +419,7 @@ try:
 
     data1 = read_file1(
         file1,
-        station1
+        station_map1[station1]
     )
 
     data2 = read_file2(
