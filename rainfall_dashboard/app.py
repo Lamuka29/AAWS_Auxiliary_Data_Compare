@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 # ============================================================
 # STREAMLIT CONFIGURATION
 # ============================================================
@@ -515,7 +514,19 @@ target2 = (
     .iloc[0][MONTHS]
     .reindex(MONTHS)
 )
+# ============================================================
+# ANOMALY CALCULATION
+# ============================================================
 
+anomaly1 = (
+    (target1 - mean1)
+    / mean1.replace(0, np.nan)
+) * 100
+
+anomaly2 = (
+    (target2 - mean2)
+    / mean2.replace(0, np.nan)
+) * 100
 
 # ============================================================
 # DIFFERENCE
