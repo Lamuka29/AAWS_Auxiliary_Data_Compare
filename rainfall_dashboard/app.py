@@ -1044,7 +1044,7 @@ with tab3:
 with tab4:
 
     st.subheader(
-        "📊 Rainfall Distribution by Category"
+        "📊 Rainfall Data Distribution by Category"
     )
 
     # --------------------------------------------------------
@@ -1110,7 +1110,6 @@ with tab4:
         rainfall_category
     )
 
-
     # --------------------------------------------------------
     # CATEGORY ORDER
     # --------------------------------------------------------
@@ -1122,7 +1121,6 @@ with tab4:
         "Heavy Rain",
         "Very Heavy Rain"
     ]
-
 
     # --------------------------------------------------------
     # COUNT
@@ -1146,7 +1144,6 @@ with tab4:
         )
     )
 
-
     # ========================================================
     # HISTOGRAM / CATEGORY FREQUENCY
     # ========================================================
@@ -1160,7 +1157,6 @@ with tab4:
     )
 
     bar_width = 0.35
-
 
     bar1 = ax.bar(
         x - bar_width / 2,
@@ -1184,7 +1180,6 @@ with tab4:
     # --------------------------------------------------------
     # VALUE LABELS
     # --------------------------------------------------------
-
     for bars in [
         bar1,
         bar2
@@ -1214,13 +1209,13 @@ with tab4:
     # --------------------------------------------------------
 
     ax.set_title(
-        "Rainfall Distribution by Category",
+        "Rainfall Data Distribution by Category",
         fontsize=16,
         fontweight="bold"
     )
 
     ax.set_xlabel(
-        "Rainfall Category"
+        "Rainfall Data Category"
     )
 
     ax.set_ylabel(
@@ -1263,12 +1258,12 @@ with tab4:
     # ========================================================
 
     st.subheader(
-        "📋 Rainfall Category Frequency"
+        "📋 Rainfall Data Category Frequency"
     )
 
     category_table = pd.DataFrame({
 
-        "Rainfall Category":
+        "Rainfall Data Category":
             rainfall_categories,
 
         f"{station1} Frequency":
