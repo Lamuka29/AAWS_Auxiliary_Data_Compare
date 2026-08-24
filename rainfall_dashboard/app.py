@@ -1798,7 +1798,7 @@ with tab6:
             values1,
             values2
         ],
-        labels=[
+        tick_labels=[
             station1,
             station2
         ],
