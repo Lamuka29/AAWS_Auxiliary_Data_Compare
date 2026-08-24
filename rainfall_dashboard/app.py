@@ -1764,15 +1764,6 @@ with tab6:
         "📦 Rainfall Distribution Boxplot"
     )
 
-    st.caption(
-        f"Perbandingan taburan data hujan bagi "
-        f"{station1} dan {station2}"
-    )
-
-    # --------------------------------------------------------
-    # GET ALL RAINFALL VALUES
-    # --------------------------------------------------------
-
     values1 = (
         analysis1[MONTHS]
         .values
@@ -1802,7 +1793,7 @@ with tab6:
         figsize=(12, 7)
     )
 
-    box = ax.boxplot(
+    ax.boxplot(
         [
             values1,
             values2
@@ -1812,7 +1803,14 @@ with tab6:
             station2
         ],
         patch_artist=True,
-        showmeans=True
+        showmeans=True,
+        flierprops=dict(
+            marker="o",
+            markersize=5,
+            markerfacecolor="red",
+            markeredgecolor="black",
+            alpha=0.7
+        )
     )
 
     # --------------------------------------------------------
