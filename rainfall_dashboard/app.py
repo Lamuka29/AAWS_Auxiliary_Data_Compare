@@ -544,12 +544,13 @@ mae = absolute_error.mean(
 # TABS
 # ============================================================
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "📊 Monthly Comparison",
     "📈 Anomaly",
     "📊 Histogram",
     "📅 Yearly Comparison",
-    "📏 Error Analysis"
+    "📏 Error Analysis",
+    "📦 Boxplot"
 ])
 # ============================================================
 # MEAN MONTHLY RAINFALL
@@ -1752,4 +1753,97 @@ with tab5:
         f"mean_absolute_error_{station1}_{station2}_{target_year}.png",
         "download_mean_absolute_error_graph"
     )
+    plt.close(fig)
+# ============================================================
+# TAB 6 - BOXPLOT
+# ============================================================
+
+with tab6:
+
+    st.subheader(
+        "📦 Rainfall Distribution Boxplot"
+    )
+
+    st.caption(
+        f"Perbandingan taburan data hujan bagi "
+        f"{station1} dan {station2}"
+    )
+
+    # --------------------------------------------------------
+    # GET ALL RAINFALL VALUES
+    # --------------------------------------------------------
+
+    values1 = (
+        analysis1[MONTHS]
+        .values
+        .flatten()
+    )
+
+    values2 = (
+        analysis2[MONTHS]
+        .values
+        .flatten()
+    )
+
+    # Remove NaN
+    values1 = values1[
+        ~np.isnan(values1)
+    ]
+
+    values2 = values2[
+        ~np.isnan(values2)
+    ]
+
+    # --------------------------------------------------------
+    # BOXPLOT
+    # --------------------------------------------------------
+
+    fig, ax = plt.subplots(
+        figsize=(12, 7)
+    )
+
+    box = ax.boxplot(
+        [
+            values1,
+            values2
+        ],
+        labels=[
+            station1,
+            station2
+        ],
+        patch_artist=True,
+        showmeans=True
+    )
+
+    # --------------------------------------------------------
+    # GRAPH SETTINGS
+    # --------------------------------------------------------
+
+    ax.set_title(
+        "Rainfall Distribution Comparison",
+        fontsize=16,
+        fontweight="bold"
+    )
+
+    ax.set_xlabel(
+        "Station"
+    )
+
+    ax.set_ylabel(
+        "Rainfall (mm)"
+    )
+
+    ax.grid(
+        axis="y",
+        linestyle="--",
+        alpha=0.4
+    )
+
+    plt.tight_layout()
+
+    st.pyplot(
+        fig,
+        use_container_width=True
+    )
+
     plt.close(fig)
