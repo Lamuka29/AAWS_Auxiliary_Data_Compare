@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import io
 
 # ============================================================
 # STREAMLIT CONFIGURATION
@@ -19,27 +20,30 @@ MONTHS = [
     "MAY", "JUN", "JUL", "AUG",
     "SEP", "OCT", "NOV", "DEC"
 ]
-import streamlit as st
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+# ============================================================
+# DOWNLOAD PLOT FUNCTION
+# ============================================================
 
-# ============================================================
-# STREAMLIT CONFIGURATION
-# ============================================================
-st.set_page_config(
-    page_title="Monthly Rainfall Comparison",
-    page_icon="🌧️",
-    layout="wide"
-)
-# ============================================================
-# CONSTANT
-# ============================================================
-MONTHS = [
-    "JAN", "FEB", "MAR", "APR",
-    "MAY", "JUN", "JUL", "AUG",
-    "SEP", "OCT", "NOV", "DEC"
-]
+def download_plot(fig, filename):
+
+    buffer = io.BytesIO()
+
+    fig.savefig(
+        buffer,
+        format="png",
+        dpi=300,
+        bbox_inches="tight"
+    )
+
+    buffer.seek(0)
+
+    st.download_button(
+        label="⬇️ Download Graph",
+        data=buffer,
+        file_name=filename,
+        mime="image/png",
+        key=f"download_{filename}"
+    )
 # ============================================================
 # FUNCTION - GET STATION NAME FROM FILE 1
 # ============================================================
