@@ -1945,85 +1945,85 @@ with tab6:
 
     plt.close(fig)
 
-# ========================================================
-# BOXPLOT STATISTICS TABLE
-# ========================================================
-
-st.subheader(
-    "📋 Monthly Boxplot Statistics"
-)
-
-boxplot_table = pd.DataFrame({
-
-    "Month":
-        MONTHS,
-
-    f"File 1 - {station1} Min (mm)":
-        [
-            np.nanmin(x) if len(x) > 0 else np.nan
-            for x in box_data1
-        ],
-
-    f"File 1 - {station1} Q1 (mm)":
-        [
-            np.percentile(x, 25)
-            if len(x) > 0 else np.nan
-            for x in box_data1
-        ],
-
-    f"File 1 - {station1} Median (mm)":
-        [
-            np.median(x)
-            if len(x) > 0 else np.nan
-            for x in box_data1
-        ],
-
-    f"File 1 - {station1} Q3 (mm)":
-        [
-            np.percentile(x, 75)
-            if len(x) > 0 else np.nan
-            for x in box_data1
-        ],
-
-    f"File 1 - {station1} Max (mm)":
-        [
-            np.nanmax(x) if len(x) > 0 else np.nan
-            for x in box_data1
-        ],
-
-    f"File 2 - {station2} Min (mm)":
-        [
-            np.nanmin(x) if len(x) > 0 else np.nan
-            for x in box_data2
-        ],
-
-    f"File 2 - {station2} Q1 (mm)":
-        [
-            np.percentile(x, 25)
-            if len(x) > 0 else np.nan
-            for x in box_data2
-        ],
-
-    f"File 2 - {station2} Median (mm)":
-        [
-            np.median(x)
-            if len(x) > 0 else np.nan
-            for x in box_data2
-        ],
-
-    f"File 2 - {station2} Q3 (mm)":
-        [
-            np.percentile(x, 75)
-            if len(x) > 0 else np.nan
-            for x in box_data2
-        ],
-
-    f"File 2 - {station2} Max (mm)":
-        [
-            np.nanmax(x) if len(x) > 0 else np.nan
-            for x in box_data2
-        ]
-})
+    # ========================================================
+    # BOXPLOT STATISTICS TABLE
+    # ========================================================
+    
+    st.subheader(
+        "📋 Monthly Boxplot Statistics"
+    )
+    
+    boxplot_table = pd.DataFrame({
+    
+        "Month":
+            MONTHS,
+    
+        f"File 1 - {station1} Min (mm)":
+            [
+                np.nanmin(x) if len(x) > 0 else np.nan
+                for x in box_data1
+            ],
+    
+        f"File 1 - {station1} Q1 (mm)":
+            [
+                np.percentile(x, 25)
+                if len(x) > 0 else np.nan
+                for x in box_data1
+            ],
+    
+        f"File 1 - {station1} Median (mm)":
+            [
+                np.median(x)
+                if len(x) > 0 else np.nan
+                for x in box_data1
+            ],
+    
+        f"File 1 - {station1} Q3 (mm)":
+            [
+                np.percentile(x, 75)
+                if len(x) > 0 else np.nan
+                for x in box_data1
+            ],
+    
+        f"File 1 - {station1} Max (mm)":
+            [
+                np.nanmax(x) if len(x) > 0 else np.nan
+                for x in box_data1
+            ],
+    
+        f"File 2 - {station2} Min (mm)":
+            [
+                np.nanmin(x) if len(x) > 0 else np.nan
+                for x in box_data2
+            ],
+    
+        f"File 2 - {station2} Q1 (mm)":
+            [
+                np.percentile(x, 25)
+                if len(x) > 0 else np.nan
+                for x in box_data2
+            ],
+    
+        f"File 2 - {station2} Median (mm)":
+            [
+                np.median(x)
+                if len(x) > 0 else np.nan
+                for x in box_data2
+            ],
+    
+        f"File 2 - {station2} Q3 (mm)":
+            [
+                np.percentile(x, 75)
+                if len(x) > 0 else np.nan
+                for x in box_data2
+            ],
+    
+        f"File 2 - {station2} Max (mm)":
+            [
+                np.nanmax(x) if len(x) > 0 else np.nan
+                for x in box_data2
+            ]
+    })
 
 st.dataframe(
     boxplot_table.round(2),
