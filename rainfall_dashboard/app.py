@@ -405,11 +405,12 @@ target_year = st.selectbox(
 # ANALYSIS TABS
 # ============================================================
 
-tab1, tab2, tab3, tab4 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "📊 Monthly Comparison",
     "📈 Anomaly",
     "📊 Histogram",
-    "📅 Yearly Analysis"
+    "📅 Yearly Comparison",
+    "📏 Error Analysis"
 ])
 
 # ============================================================
@@ -427,12 +428,9 @@ analysis2 = data2[
         common_years
     )
 ].copy()
-
-
 # ============================================================
 # MEAN MONTHLY RAINFALL
 # ============================================================
-
 mean1 = (
     analysis1[MONTHS]
     .mean(
@@ -441,7 +439,6 @@ mean1 = (
     )
     .reindex(MONTHS)
 )
-
 mean2 = (
     analysis2[MONTHS]
     .mean(
@@ -450,12 +447,9 @@ mean2 = (
     )
     .reindex(MONTHS)
 )
-
-
 # ============================================================
 # TARGET YEAR
 # ============================================================
-
 target1 = (
     analysis1[
         analysis1["YEAR"]
@@ -464,7 +458,6 @@ target1 = (
     .iloc[0][MONTHS]
     .reindex(MONTHS)
 )
-
 target2 = (
     analysis2[
         analysis2["YEAR"]
@@ -476,24 +469,22 @@ target2 = (
 # ============================================================
 # DIFFERENCE
 # ============================================================
-
-mean_difference = (
-    mean1 - mean2
-)
-
-target_difference = (
-    target1 - target2
-)
-
+mean_difference = (mean1 - mean2)
+target_difference = (target1 - target2)
+# ============================================================
+# ERROR ANALYSIS CALCULATION
+# File 1 = Automatic Station
+# File 2 = Observation
+# ============================================================
+basic_diff = (target1 - target2)
+percentage_diff = (basic_diff / target2.replace(0, np.nan)) * 100
+absolute_error = (basic_diff.abs())
+mae1 = (absolute_error.mean(skipna=True))
 # ============================================================
 # TAB 1 - MONTHLY COMPARISON
 # ============================================================
-
 with tab1:
-
-    st.subheader(
-        "📊 Monthly Rainfall Comparison"
-    )
+    st.subheader("📊 Monthly Rainfall Comparison")
 
     fig, ax = plt.subplots(
         figsize=(15, 8)
@@ -1063,45 +1054,33 @@ with tab3:
 # ============================================================
 # TAB 4 - YEARLY COMPARISON
 # ============================================================
-
 with tab4:
-
-    st.subheader(
-        "📅 Yearly Rainfall Comparison"
-    )
-
+    st.subheader("📅 Yearly Rainfall Comparison")
     # --------------------------------------------------------
     # YEARLY TOTAL
     # --------------------------------------------------------
-
     yearly_total1 = (
         analysis1
         .set_index("YEAR")
         .reindex(common_years)["ANNUAL"]
     )
-
     yearly_total2 = (
         analysis2
         .set_index("YEAR")
         .reindex(common_years)["ANNUAL"]
     )
-
     # --------------------------------------------------------
     # YEARLY MEAN
     # --------------------------------------------------------
-
     yearly_mean1 = yearly_total1.mean(
         skipna=True
     )
-
     yearly_mean2 = yearly_total2.mean(
         skipna=True
     )
-
     # --------------------------------------------------------
     # DIFFERENCE
     # --------------------------------------------------------
-
     yearly_difference = (
         yearly_total1
         - yearly_total2
@@ -1284,3 +1263,172 @@ with tab4:
         use_container_width=True,
         hide_index=True
     )
+# ============================================================
+# TAB 6- ERROR ANALYSIS
+# ============================================================
+with tab6:
+    st.subheader(f"📏 Automatic vs Observation Error Analysis - {target_year}")
+
+    st.caption(
+        f"Automatic Station: {station1} | "
+        f"Observation: {station2}"
+    )
+
+    # ========================================================
+    # SUMMARY METRICS
+    # ========================================================
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+
+        st.metric(
+            "Mean Basic Difference",
+            f"{basic_diff.mean(skipna=True):.2f} mm"
+        )
+
+    with col2:
+
+        st.metric(
+            "Mean Percentage Difference",
+            f"{percentage_diff.mean(skipna=True):.2f}%"
+        )
+
+    with col3:
+
+        st.metric(
+            "Mean Absolute Error (MAE)",
+            f"{mae1:.2f} mm"
+        )
+
+
+    # ========================================================
+    # MONTHLY ERROR TABLE
+    # ========================================================
+
+    st.subheader(
+        "📋 Monthly Error Comparison"
+    )
+
+    error_table = pd.DataFrame({
+
+        "Month":
+            MONTHS,
+
+        "Automatic (mm)":
+            target1.values,
+
+        "Observation (mm)":
+            target2.values,
+
+        "Basic Difference (mm)":
+            basic_diff.values,
+
+        "Percentage Difference (%)":
+            percentage_diff.values,
+
+        "Absolute Error (mm)":
+            absolute_error.values
+
+    })
+
+    st.dataframe(
+        error_table.round(2),
+        use_container_width=True,
+        hide_index=True
+    )
+
+
+    # ========================================================
+    # ERROR GRAPH
+    # ========================================================
+
+    st.subheader(
+        "📊 Monthly Difference"
+    )
+
+    fig, ax = plt.subplots(
+        figsize=(15, 7)
+    )
+
+    x = np.arange(
+        len(MONTHS)
+    )
+
+    bars = ax.bar(
+        x,
+        basic_diff.values,
+        color="steelblue",
+        edgecolor="black"
+    )
+
+    # Zero line
+    ax.axhline(
+        0,
+        color="black",
+        linewidth=1
+    )
+
+    # Value labels
+    for bar in bars:
+
+        value = bar.get_height()
+
+        if pd.notna(value):
+
+            offset = (
+                5
+                if value >= 0
+                else -15
+            )
+
+            ax.annotate(
+                f"{value:.1f}",
+                (
+                    bar.get_x()
+                    + bar.get_width() / 2,
+                    value
+                ),
+                xytext=(0, offset),
+                textcoords="offset points",
+                ha="center",
+                fontsize=8
+            )
+
+    ax.set_title(
+        f"Basic Difference: "
+        f"{station1} - {station2}",
+        fontsize=16,
+        fontweight="bold"
+    )
+
+    ax.set_xlabel(
+        "Month"
+    )
+
+    ax.set_ylabel(
+        "Difference (mm)"
+    )
+
+    ax.set_xticks(
+        x
+    )
+
+    ax.set_xticklabels(
+        MONTHS
+    )
+
+    ax.grid(
+        axis="y",
+        linestyle="--",
+        alpha=0.4
+    )
+
+    plt.tight_layout()
+
+    st.pyplot(
+        fig,
+        use_container_width=True
+    )
+
+    plt.close(fig)
