@@ -1111,7 +1111,7 @@ with tab3:
     )
     download_table(
         category_table,
-        f"rainfall_category_{station1}_{station2}_{target_year}.csv"
+        f"rainfall_category_{station1}_{station2}_{target_year}.csv",
         "download_rainfall_category_table"
     )
 # ============================================================
@@ -1504,7 +1504,7 @@ with tab5:
     )
     download_plot(
         fig,
-        f"basic_difference_{station1}_{station2}_{target_year}.png"
+        f"basic_difference_{station1}_{station2}_{target_year}.png",
         "download_basic_difference_graph"
     )
     plt.close(fig)
@@ -1588,7 +1588,7 @@ with tab5:
     )
     download_plot(
         fig,
-        f"percentage_difference_{station1}_{station2}_{target_year}.png"
+        f"percentage_difference_{station1}_{station2}_{target_year}.png",
         "download_percentage_difference_graph"
     )
     plt.close(fig)
@@ -1663,7 +1663,7 @@ with tab5:
     )
     download_plot(
         fig,
-        f"mean_absolute_error_{station1}_{station2}_{target_year}.png"
+        f"mean_absolute_error_{station1}_{station2}_{target_year}.png",
         "download_mean_absolute_error_graph"
     )
     plt.close(fig)
