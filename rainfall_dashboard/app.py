@@ -1112,7 +1112,7 @@ with tab3:
     download_table(
         category_table,
         f"rainfall_category_{station1}_{station2}_{target_year}.csv"
-        "download_rainfall_category_graph"
+        "download_rainfall_category_table"
     )
 # ============================================================
 # TAB 4 - YEARLY COMPARISON
@@ -1331,7 +1331,7 @@ with tab4:
     download_table(
         yearly_comparison.round(2),
         f"yearly_comparison_{station1}_{station2}.csv",
-        "download_yearly_comparison_graph"
+        "download_yearly_comparison_table"
     )
 # ============================================================
 # TAB 5- ERROR ANALYSIS
