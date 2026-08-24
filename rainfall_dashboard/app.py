@@ -474,10 +474,15 @@ target_difference = (target1 - target2)
 # File 1 = Automatic Station
 # File 2 = Observation
 # ============================================================
+# Basic Difference
 basic_diff = (target1 - target2)
+# Percentage Difference
 percentage_diff = (basic_diff / target2.replace(0, np.nan)) * 100
+# Absolute Error
 absolute_error = (basic_diff.abs())
+# Mean Absolute Error
 mae1 = (absolute_error.mean(skipna=True))
+
 # ============================================================
 # TAB 1 - MONTHLY COMPARISON
 # ============================================================
@@ -1271,9 +1276,8 @@ with tab5:
         f"Automatic Station: {station1} | "
         f"Observation: {station2}"
     )
-
     # ========================================================
-    # SUMMARY METRICS
+    # METRICS
     # ========================================================
 
     col1, col2, col3 = st.columns(3)
@@ -1281,14 +1285,14 @@ with tab5:
     with col1:
 
         st.metric(
-            "Mean Basic Difference",
+            "Basic Difference",
             f"{basic_diff.mean(skipna=True):.2f} mm"
         )
 
     with col2:
 
         st.metric(
-            "Mean Percentage Difference",
+            "Percentage Difference",
             f"{percentage_diff.mean(skipna=True):.2f}%"
         )
 
@@ -1296,16 +1300,16 @@ with tab5:
 
         st.metric(
             "Mean Absolute Error (MAE)",
-            f"{mae1:.2f} mm"
+            f"{mae:.2f} mm"
         )
 
 
     # ========================================================
-    # MONTHLY ERROR TABLE
+    # TABLE
     # ========================================================
 
     st.subheader(
-        "📋 Monthly Error Comparison"
+        "📋 Monthly Error Analysis"
     )
 
     error_table = pd.DataFrame({
@@ -1313,10 +1317,10 @@ with tab5:
         "Month":
             MONTHS,
 
-        "Automatic (mm)":
+        f"Automatic ({station1}) (mm)":
             target1.values,
 
-        "Observation (mm)":
+        f"Observation ({station2}) (mm)":
             target2.values,
 
         "Basic Difference (mm)":
@@ -1335,8 +1339,92 @@ with tab5:
         use_container_width=True,
         hide_index=True
     )
+        # ========================================================
+    # BASIC DIFFERENCE GRAPH
+    # ========================================================
 
+    st.subheader(
+        "📊 Basic Difference"
+    )
 
+    fig, ax = plt.subplots(
+        figsize=(15, 7)
+    )
+
+    x = np.arange(
+        len(MONTHS)
+    )
+
+    bars = ax.bar(
+        x,
+        basic_diff.values,
+        color="steelblue",
+        edgecolor="black"
+    )
+
+    ax.axhline(
+        0,
+        color="black",
+        linewidth=1
+    )
+
+    for bar in bars:
+
+        value = bar.get_height()
+
+        if pd.notna(value):
+
+            ax.annotate(
+                f"{value:.1f}",
+                (
+                    bar.get_x()
+                    + bar.get_width() / 2,
+                    value
+                ),
+                xytext=(
+                    0,
+                    5 if value >= 0 else -15
+                ),
+                textcoords="offset points",
+                ha="center",
+                fontsize=8
+            )
+
+    ax.set_title(
+        f"Basic Difference: "
+        f"{station1} - {station2}",
+        fontsize=16,
+        fontweight="bold"
+    )
+
+    ax.set_xlabel(
+        "Month"
+    )
+
+    ax.set_ylabel(
+        "Difference (mm)"
+    )
+
+    ax.set_xticks(x)
+
+    ax.set_xticklabels(
+        MONTHS
+    )
+
+    ax.grid(
+        axis="y",
+        linestyle="--",
+        alpha=0.4
+    )
+
+    plt.tight_layout()
+
+    st.pyplot(
+        fig,
+        use_container_width=True
+    )
+
+    plt.close(fig)
     # ========================================================
     # ERROR GRAPH
     # ========================================================
