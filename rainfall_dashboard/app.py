@@ -407,7 +407,7 @@ except Exception as e:
 
 analysis1 = data1.copy()
 analysis2 = data2.copy()
-
+print("analysis1")
 
 # ============================================================
 # COMMON YEARS
