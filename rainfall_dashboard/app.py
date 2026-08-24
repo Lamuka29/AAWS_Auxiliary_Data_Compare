@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 # ============================================================
 # STREAMLIT CONFIGURATION
 # ============================================================
-
 st.set_page_config(
     page_title="Monthly Rainfall Comparison",
     page_icon="🌧️",
@@ -404,8 +403,7 @@ target_year = st.selectbox(
 # ============================================================
 # ANALYSIS TABS
 # ============================================================
-
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "📊 Monthly Comparison",
     "📈 Anomaly",
     "📊 Histogram",
@@ -1264,9 +1262,9 @@ with tab4:
         hide_index=True
     )
 # ============================================================
-# TAB 6- ERROR ANALYSIS
+# TAB 5- ERROR ANALYSIS
 # ============================================================
-with tab6:
+with tab5:
     st.subheader(f"📏 Automatic vs Observation Error Analysis - {target_year}")
 
     st.caption(
