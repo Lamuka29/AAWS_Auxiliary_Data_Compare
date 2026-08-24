@@ -1945,80 +1945,98 @@ with tab6:
 
     plt.close(fig)
 
-    # ========================================================
-    # BOXPLOT STATISTICS TABLE
-    # ========================================================
+# ========================================================
+# BOXPLOT STATISTICS TABLE
+# ========================================================
 
-    st.subheader(
-        "📋 Monthly Boxplot Statistics"
-    )
+st.subheader(
+    "📋 Monthly Boxplot Statistics"
+)
 
-    boxplot_table = pd.DataFrame({
-        "Month": MONTHS,
+boxplot_table = pd.DataFrame({
 
-        f"{station1} Min (mm)": [
+    "Month":
+        MONTHS,
+
+    f"File 1 - {station1} Min (mm)":
+        [
             np.nanmin(x) if len(x) > 0 else np.nan
             for x in box_data1
         ],
 
-        f"{station1} Q1 (mm)": [
-            np.percentile(x, 25) if len(x) > 0 else np.nan
+    f"File 1 - {station1} Q1 (mm)":
+        [
+            np.percentile(x, 25)
+            if len(x) > 0 else np.nan
             for x in box_data1
         ],
 
-        f"{station1} Median (mm)": [
-            np.median(x) if len(x) > 0 else np.nan
+    f"File 1 - {station1} Median (mm)":
+        [
+            np.median(x)
+            if len(x) > 0 else np.nan
             for x in box_data1
         ],
 
-        f"{station1} Q3 (mm)": [
-            np.percentile(x, 75) if len(x) > 0 else np.nan
+    f"File 1 - {station1} Q3 (mm)":
+        [
+            np.percentile(x, 75)
+            if len(x) > 0 else np.nan
             for x in box_data1
         ],
 
-        f"{station1} Max (mm)": [
+    f"File 1 - {station1} Max (mm)":
+        [
             np.nanmax(x) if len(x) > 0 else np.nan
             for x in box_data1
         ],
 
-        f"{station2} Min (mm)": [
+    f"File 2 - {station2} Min (mm)":
+        [
             np.nanmin(x) if len(x) > 0 else np.nan
             for x in box_data2
         ],
 
-        f"{station2} Q1 (mm)": [
-            np.percentile(x, 25) if len(x) > 0 else np.nan
+    f"File 2 - {station2} Q1 (mm)":
+        [
+            np.percentile(x, 25)
+            if len(x) > 0 else np.nan
             for x in box_data2
         ],
 
-        f"{station2} Median (mm)": [
-            np.median(x) if len(x) > 0 else np.nan
+    f"File 2 - {station2} Median (mm)":
+        [
+            np.median(x)
+            if len(x) > 0 else np.nan
             for x in box_data2
         ],
 
-        f"{station2} Q3 (mm)": [
-            np.percentile(x, 75) if len(x) > 0 else np.nan
+    f"File 2 - {station2} Q3 (mm)":
+        [
+            np.percentile(x, 75)
+            if len(x) > 0 else np.nan
             for x in box_data2
         ],
 
-        f"{station2} Max (mm)": [
+    f"File 2 - {station2} Max (mm)":
+        [
             np.nanmax(x) if len(x) > 0 else np.nan
             for x in box_data2
         ]
-    })
+})
 
-    st.dataframe(
-        boxplot_table.round(2),
-        use_container_width=True,
-        hide_index=True
-    )
+st.dataframe(
+    boxplot_table.round(2),
+    use_container_width=True,
+    hide_index=True
+)
 
-    download_table(
-        boxplot_table.round(2),
-        f"monthly_boxplot_statistics_{station1}_{station2}.csv",
-        "download_boxplot_table"
-    )
-    plt.close(fig)
+download_table(
+    boxplot_table.round(2),
+    f"monthly_boxplot_statistics_{station1}_{station2}.csv",
+    "download_boxplot_table"
+)
+plt.close(fig)
 # ============================================================
 # TAB 7 - HEATMAP
 # ============================================================
