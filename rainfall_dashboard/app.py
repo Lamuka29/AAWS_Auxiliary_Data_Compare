@@ -1933,7 +1933,91 @@ with tab6:
         fig,
         use_container_width=True
     )
+     # ========================================================
+    # DOWNLOAD GRAPH
+    # ========================================================
 
+    download_plot(
+        fig,
+        f"monthly_boxplot_{station1}_{station2}.png",
+        "download_boxplot_graph"
+    )
+
+    plt.close(fig)
+
+    # ========================================================
+    # BOXPLOT STATISTICS TABLE
+    # ========================================================
+
+    st.subheader(
+        "📋 Monthly Boxplot Statistics"
+    )
+
+    boxplot_table = pd.DataFrame({
+        "Month": MONTHS,
+
+        f"{station1} Min (mm)": [
+            np.nanmin(x) if len(x) > 0 else np.nan
+            for x in box_data1
+        ],
+
+        f"{station1} Q1 (mm)": [
+            np.percentile(x, 25) if len(x) > 0 else np.nan
+            for x in box_data1
+        ],
+
+        f"{station1} Median (mm)": [
+            np.median(x) if len(x) > 0 else np.nan
+            for x in box_data1
+        ],
+
+        f"{station1} Q3 (mm)": [
+            np.percentile(x, 75) if len(x) > 0 else np.nan
+            for x in box_data1
+        ],
+
+        f"{station1} Max (mm)": [
+            np.nanmax(x) if len(x) > 0 else np.nan
+            for x in box_data1
+        ],
+
+        f"{station2} Min (mm)": [
+            np.nanmin(x) if len(x) > 0 else np.nan
+            for x in box_data2
+        ],
+
+        f"{station2} Q1 (mm)": [
+            np.percentile(x, 25) if len(x) > 0 else np.nan
+            for x in box_data2
+        ],
+
+        f"{station2} Median (mm)": [
+            np.median(x) if len(x) > 0 else np.nan
+            for x in box_data2
+        ],
+
+        f"{station2} Q3 (mm)": [
+            np.percentile(x, 75) if len(x) > 0 else np.nan
+            for x in box_data2
+        ],
+
+        f"{station2} Max (mm)": [
+            np.nanmax(x) if len(x) > 0 else np.nan
+            for x in box_data2
+        ]
+    })
+
+    st.dataframe(
+        boxplot_table.round(2),
+        use_container_width=True,
+        hide_index=True
+    )
+
+    download_table(
+        boxplot_table.round(2),
+        f"monthly_boxplot_statistics_{station1}_{station2}.csv",
+        "download_boxplot_table"
+    )
     plt.close(fig)
 # ============================================================
 # TAB 7 - HEATMAP
@@ -2123,5 +2207,59 @@ with tab7:
         fig,
         use_container_width=True
     )
+        # ========================================================
+    # DOWNLOAD HEATMAP GRAPH
+    # ========================================================
 
+    download_plot(
+        fig,
+        f"monthly_heatmap_{station1}_{station2}.png",
+        "download_heatmap_graph"
+    )
+
+    plt.close(fig)
+
+    # ========================================================
+    # HEATMAP TABLE - STATION 1
+    # ========================================================
+
+    st.subheader(
+        f"📋 Monthly Rainfall Table - {station1}"
+    )
+
+    heatmap_table1 = heatmap1.reset_index()
+
+    st.dataframe(
+        heatmap_table1.round(2),
+        use_container_width=True,
+        hide_index=True
+    )
+
+    download_table(
+        heatmap_table1.round(2),
+        f"monthly_heatmap_{station1}.csv",
+        "download_heatmap_table1"
+    )
+
+    # ========================================================
+    # HEATMAP TABLE - STATION 2
+    # ========================================================
+
+    st.subheader(
+        f"📋 Monthly Rainfall Table - {station2}"
+    )
+
+    heatmap_table2 = heatmap2.reset_index()
+
+    st.dataframe(
+        heatmap_table2.round(2),
+        use_container_width=True,
+        hide_index=True
+    )
+
+    download_table(
+        heatmap_table2.round(2),
+        f"monthly_heatmap_{station2}.csv",
+        "download_heatmap_table2"
+    )
     plt.close(fig)
