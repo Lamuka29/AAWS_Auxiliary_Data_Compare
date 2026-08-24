@@ -1874,29 +1874,6 @@ def read_file2(uploaded_file,station):
     )
     return data
 # ============================================================
-# UPLOAD FILES
-# ============================================================
-st.subheader("📁 Upload Rainfall Data Files")
-
-col1, col2 = st.columns(2)
-with col1:
-    file1 = st.file_uploader(
-        "File 1 - Data AAWS MyMetData",
-        type=["xlsx", "xls"],
-        key="file1"
-    )
-
-with col2:
-    file2 = st.file_uploader(
-        "File 2 - Data Auksiliari Kajiiklim",
-        type=["xlsx", "xls"],
-        key="file2"
-    )
-
-if file1 is None or file2 is None:
-    st.info("⬆️ Sila upload kedua-dua fail.")
-    st.stop()
-# ============================================================
 # READ EXCEL
 # ============================================================
 try:
