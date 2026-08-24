@@ -55,36 +55,22 @@ st.title(
     "🌧️ Monthly Rainfall File Comparison"
 )
 
-st.markdown(
-    """
-    Perbandingan data hujan bulanan antara **dua fail**
-    bagi stesen dan tahun yang sama.
-    """
-)
-
+st.markdown("""Perbandingan data hujan tahunan antara **Data AAWS** dan **Data Kajiiklim** bagi tahun yang sama.""")
 
 # ============================================================
 # FUNCTION - FILE 1
 # ============================================================
-
-def read_file1(
-    uploaded_file,
-    station
-):
-
+def read_file1(uploaded_file,station):
     # --------------------------------------------------------
     # FILE 1
-    #
     # Sheet = Station
     # A = YEAR
     # B:M = JAN:DEC
     # N = ANNUAL
-    #
     # Table starts around row 9/10
     # Header = row 10
     # Data = row 11
     # --------------------------------------------------------
-
     raw = pd.read_excel(
         uploaded_file,
         sheet_name=station,
@@ -94,7 +80,6 @@ def read_file1(
 
     # Data starts row 11
     data = raw.iloc[10:].copy()
-
     data.columns = [
         "YEAR",
         "JAN",
@@ -111,16 +96,14 @@ def read_file1(
         "DEC",
         "ANNUAL"
     ]
-
     # --------------------------------------------------------
     # YEAR
     # --------------------------------------------------------
-
     data["YEAR"] = pd.to_numeric(
         data["YEAR"],
         errors="coerce"
     )
-
+    
     data = data[
         data["YEAR"].notna()
     ].copy()
@@ -136,31 +119,24 @@ def read_file1(
         data["YEAR"]
         .astype(int)
     )
-
     # --------------------------------------------------------
     # MONTHS
     # --------------------------------------------------------
-
     for month in MONTHS:
-
         data[month] = pd.to_numeric(
             data[month],
             errors="coerce"
         )
-
     # --------------------------------------------------------
     # ANNUAL
     # --------------------------------------------------------
-
     data["ANNUAL"] = pd.to_numeric(
         data["ANNUAL"],
         errors="coerce"
     )
-
     # --------------------------------------------------------
     # REMOVE DUPLICATES
     # --------------------------------------------------------
-
     data = (
         data
         .drop_duplicates(
@@ -170,42 +146,29 @@ def read_file1(
         .sort_values("YEAR")
         .reset_index(drop=True)
     )
-
     return data
-
-
 # ============================================================
 # FUNCTION - FILE 2
 # ============================================================
-
-def read_file2(
-    uploaded_file,
-    station
-):
-
+def read_file2(uploaded_file,station):
     # --------------------------------------------------------
     # FILE 2
-    #
     # Sheet = Station
     # B = YEAR
     # C:N = JAN:DEC
     # O = ANNUAL
-    #
     # Table starts around B5:O5/6
     # Header = row 6
     # Data = row 7
     # --------------------------------------------------------
-
     raw = pd.read_excel(
         uploaded_file,
         sheet_name=station,
         header=None,
         usecols="B:O"
     )
-
     # Data starts row 7
     data = raw.iloc[6:].copy()
-
     data.columns = [
         "YEAR",
         "JAN",
@@ -222,11 +185,9 @@ def read_file2(
         "DEC",
         "ANNUAL"
     ]
-
     # --------------------------------------------------------
     # YEAR
     # --------------------------------------------------------
-
     data["YEAR"] = pd.to_numeric(
         data["YEAR"],
         errors="coerce"
@@ -247,31 +208,24 @@ def read_file2(
         data["YEAR"]
         .astype(int)
     )
-
     # --------------------------------------------------------
     # MONTHS
     # --------------------------------------------------------
-
     for month in MONTHS:
-
         data[month] = pd.to_numeric(
             data[month],
             errors="coerce"
         )
-
     # --------------------------------------------------------
     # ANNUAL
     # --------------------------------------------------------
-
     data["ANNUAL"] = pd.to_numeric(
         data["ANNUAL"],
         errors="coerce"
     )
-
     # --------------------------------------------------------
     # REMOVE DUPLICATES
     # --------------------------------------------------------
-
     data = (
         data
         .drop_duplicates(
@@ -281,100 +235,62 @@ def read_file2(
         .sort_values("YEAR")
         .reset_index(drop=True)
     )
-
     return data
-
-
 # ============================================================
 # UPLOAD FILES
 # ============================================================
-
-st.subheader(
-    "📁 Upload Rainfall Files"
-)
+st.subheader("📁 Upload Rainfall Data Files")
 
 col1, col2 = st.columns(2)
-
 with col1:
-
     file1 = st.file_uploader(
-        "File 1 - Daily Rainfall",
+        "File 1 - Data AAWS MyMetData",
         type=["xlsx", "xls"],
         key="file1"
     )
 
 with col2:
-
     file2 = st.file_uploader(
-        "File 2 - Monthly/Yearly Rainfall",
+        "File 2 - Data Auksiliari Kajiiklim",
         type=["xlsx", "xls"],
         key="file2"
     )
 
-
 if file1 is None or file2 is None:
-
-    st.info(
-        "⬆️ Sila upload kedua-dua fail."
-    )
-
+    st.info("⬆️ Sila upload kedua-dua fail.")
     st.stop()
-
-
 # ============================================================
 # READ EXCEL
 # ============================================================
-
 try:
-
     excel1 = pd.ExcelFile(file1)
-
     excel2 = pd.ExcelFile(file2)
 
 except Exception as e:
-
-    st.error(
-        f"❌ Gagal membaca fail: {e}"
-    )
-
+    st.error(f"❌ Gagal membaca fail: {e}")
     st.stop()
-
-
 # ============================================================
 # STATION LIST
 # ============================================================
-
 sheets1 = excel1.sheet_names
 sheets2 = excel2.sheet_names
-
-
 # ------------------------------------------------------------
 # FILE 1
 # Station name is stored in B4
 # ------------------------------------------------------------
-
 station_map1 = {}
 
 for sheet in sheets1:
-
     try:
-
-        station_name = get_station_name(
-            file1,
-            sheet
-        )
-
+        station_name = get_station_name(file1,sheet)
         station_map1[station_name] = sheet
 
     except Exception:
         continue
-
-
 # ------------------------------------------------------------
 # FILE 2
 # Station name = sheet name
 # ------------------------------------------------------------
-
 station_map2 = {
     sheet: sheet
     for sheet in sheets2
