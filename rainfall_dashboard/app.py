@@ -481,7 +481,7 @@ percentage_diff = (basic_diff / target2.replace(0, np.nan)) * 100
 # Absolute Error
 absolute_error = (basic_diff.abs())
 # Mean Absolute Error
-mae1 = (absolute_error.mean(skipna=True))
+mae = (absolute_error.mean(skipna=True))
 
 # ============================================================
 # TAB 1 - MONTHLY COMPARISON
