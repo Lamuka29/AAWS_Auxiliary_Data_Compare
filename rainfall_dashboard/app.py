@@ -23,7 +23,6 @@ MONTHS = [
 # ============================================================
 # DOWNLOAD PLOT FUNCTION
 # ============================================================
-
 def download_plot(fig, filename):
 
     buffer = io.BytesIO()
@@ -43,6 +42,19 @@ def download_plot(fig, filename):
         file_name=filename,
         mime="image/png",
         key=f"download_{filename}"
+    )
+def download_table(df, filename):
+
+    csv = df.to_csv(
+        index=False
+    ).encode("utf-8")
+
+    st.download_button(
+        "⬇️ Download Table",
+        data=csv,
+        file_name=filename,
+        mime="text/csv",
+        key=f"table_{filename}"
     )
 # ============================================================
 # FUNCTION - GET STATION NAME FROM FILE 1
