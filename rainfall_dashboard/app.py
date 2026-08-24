@@ -15,7 +15,6 @@ st.set_page_config(
     layout="wide"
 )
 
-
 # ============================================================
 # CONSTANT
 # ============================================================
@@ -544,13 +543,14 @@ mae = absolute_error.mean(
 # TABS
 # ============================================================
 
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📊 Monthly Comparison",
     "📈 Anomaly",
     "📊 Histogram",
     "📅 Yearly Comparison",
     "📏 Error Analysis",
-    "📦 Boxplot"
+    "📦 Boxplot",
+    "🔥 Heatmap"
 ])
 # ============================================================
 # MEAN MONTHLY RAINFALL
@@ -1927,6 +1927,196 @@ with tab6:
 
     plt.tight_layout(
         rect=[0, 0, 0.82, 1]
+    )
+
+    st.pyplot(
+        fig,
+        use_container_width=True
+    )
+
+    plt.close(fig)
+# ============================================================
+# TAB 7 - HEATMAP
+# ============================================================
+with tab7:
+
+    st.subheader(
+        "🔥 Monthly Rainfall Heatmap"
+    )
+
+    st.caption(
+        f"Monthly rainfall distribution by year: "
+        f"{station1} vs {station2}"
+    )
+
+    # --------------------------------------------------------
+    # PREPARE DATA
+    # --------------------------------------------------------
+
+    heatmap1 = (
+        analysis1
+        .set_index("YEAR")
+        .reindex(common_years)[MONTHS]
+    )
+
+    heatmap2 = (
+        analysis2
+        .set_index("YEAR")
+        .reindex(common_years)[MONTHS]
+    )
+
+    # --------------------------------------------------------
+    # CREATE FIGURE
+    # --------------------------------------------------------
+
+    fig, axes = plt.subplots(
+        2,
+        1,
+        figsize=(16, 12)
+    )
+
+    # --------------------------------------------------------
+    # STATION 1
+    # --------------------------------------------------------
+
+    im1 = axes[0].imshow(
+        heatmap1.values,
+        aspect="auto",
+        cmap="YlGnBu"
+    )
+
+    axes[0].set_title(
+        station1,
+        fontsize=15,
+        fontweight="bold"
+    )
+
+    axes[0].set_xticks(
+        np.arange(len(MONTHS))
+    )
+
+    axes[0].set_xticklabels(
+        MONTHS
+    )
+
+    axes[0].set_yticks(
+        np.arange(len(common_years))
+    )
+
+    axes[0].set_yticklabels(
+        common_years
+    )
+
+    axes[0].set_ylabel(
+        "Year"
+    )
+
+    # --------------------------------------------------------
+    # VALUE LABELS STATION 1
+    # --------------------------------------------------------
+
+    for i in range(len(common_years)):
+
+        for j in range(len(MONTHS)):
+
+            value = heatmap1.iloc[i, j]
+
+            if pd.notna(value):
+
+                axes[0].text(
+                    j,
+                    i,
+                    f"{value:.0f}",
+                    ha="center",
+                    va="center",
+                    fontsize=7
+                )
+
+    fig.colorbar(
+        im1,
+        ax=axes[0],
+        label="Rainfall (mm)"
+    )
+
+    # --------------------------------------------------------
+    # STATION 2
+    # --------------------------------------------------------
+
+    im2 = axes[1].imshow(
+        heatmap2.values,
+        aspect="auto",
+        cmap="YlOrRd"
+    )
+
+    axes[1].set_title(
+        station2,
+        fontsize=15,
+        fontweight="bold"
+    )
+
+    axes[1].set_xticks(
+        np.arange(len(MONTHS))
+    )
+
+    axes[1].set_xticklabels(
+        MONTHS
+    )
+
+    axes[1].set_yticks(
+        np.arange(len(common_years))
+    )
+
+    axes[1].set_yticklabels(
+        common_years
+    )
+
+    axes[1].set_xlabel(
+        "Month"
+    )
+
+    axes[1].set_ylabel(
+        "Year"
+    )
+
+    # --------------------------------------------------------
+    # VALUE LABELS STATION 2
+    # --------------------------------------------------------
+
+    for i in range(len(common_years)):
+
+        for j in range(len(MONTHS)):
+
+            value = heatmap2.iloc[i, j]
+
+            if pd.notna(value):
+
+                axes[1].text(
+                    j,
+                    i,
+                    f"{value:.0f}",
+                    ha="center",
+                    va="center",
+                    fontsize=7
+                )
+
+    fig.colorbar(
+        im2,
+        ax=axes[1],
+        label="Rainfall (mm)"
+    )
+
+    # --------------------------------------------------------
+    # TITLE
+    # --------------------------------------------------------
+
+    fig.suptitle(
+        "Monthly Rainfall Heatmap",
+        fontsize=18,
+        fontweight="bold"
+    )
+
+    plt.tight_layout(
+        rect=[0, 0, 1, 0.96]
     )
 
     st.pyplot(
