@@ -11,12 +11,9 @@ st.set_page_config(
     page_icon="🌧️",
     layout="wide"
 )
-
-
 # ============================================================
 # CONSTANT
 # ============================================================
-
 MONTHS = [
     "JAN", "FEB", "MAR", "APR",
     "MAY", "JUN", "JUL", "AUG",
@@ -25,12 +22,7 @@ MONTHS = [
 # ============================================================
 # FUNCTION - GET STATION NAME FROM FILE 1
 # ============================================================
-
-def get_station_name(
-    uploaded_file,
-    sheet_name
-):
-
+def get_station_name(uploaded_file,sheet_name):
     raw = pd.read_excel(
         uploaded_file,
         sheet_name=sheet_name,
@@ -45,11 +37,9 @@ def get_station_name(
         return sheet_name
 
     return str(station_name).strip()
-
 # ============================================================
 # TITLE
 # ============================================================
-
 st.title(
     "🌧️ Monthly Rainfall File Comparison"
 )
@@ -1270,12 +1260,16 @@ with tab4:
 # TAB 5- ERROR ANALYSIS
 # ============================================================
 with tab5:
-    st.subheader(f"📏 Automatic vs Observation Error Analysis - {target_year}")
+
+    st.subheader(
+        f"📏 Automatic vs Observation Error Analysis - {target_year}"
+    )
 
     st.caption(
         f"Automatic Station: {station1} | "
         f"Observation: {station2}"
     )
+
     # ========================================================
     # METRICS
     # ========================================================
@@ -1339,7 +1333,18 @@ with tab5:
         use_container_width=True,
         hide_index=True
     )
-        # ========================================================
+
+
+    # ========================================================
+    # X AXIS
+    # ========================================================
+
+    x = np.arange(
+        len(MONTHS)
+    )
+
+
+    # ========================================================
     # BASIC DIFFERENCE GRAPH
     # ========================================================
 
@@ -1349,10 +1354,6 @@ with tab5:
 
     fig, ax = plt.subplots(
         figsize=(15, 7)
-    )
-
-    x = np.arange(
-        len(MONTHS)
     )
 
     bars = ax.bar(
@@ -1397,9 +1398,7 @@ with tab5:
         fontweight="bold"
     )
 
-    ax.set_xlabel(
-        "Month"
-    )
+    ax.set_xlabel("Month")
 
     ax.set_ylabel(
         "Difference (mm)"
@@ -1425,48 +1424,114 @@ with tab5:
     )
 
     plt.close(fig)
+
+
     # ========================================================
-    # ERROR GRAPH
+    # PERCENTAGE DIFFERENCE GRAPH
     # ========================================================
 
     st.subheader(
-        "📊 Monthly Difference"
+        "📊 Percentage Difference"
     )
 
     fig, ax = plt.subplots(
         figsize=(15, 7)
     )
 
-    x = np.arange(
-        len(MONTHS)
-    )
-
     bars = ax.bar(
         x,
-        basic_diff.values,
-        color="steelblue",
+        percentage_diff.values,
+        color="darkorange",
         edgecolor="black"
     )
 
-    # Zero line
     ax.axhline(
         0,
         color="black",
         linewidth=1
     )
 
-    # Value labels
     for bar in bars:
 
         value = bar.get_height()
 
         if pd.notna(value):
 
-            offset = (
-                5
-                if value >= 0
-                else -15
+            ax.annotate(
+                f"{value:.1f}%",
+                (
+                    bar.get_x()
+                    + bar.get_width() / 2,
+                    value
+                ),
+                xytext=(
+                    0,
+                    5 if value >= 0 else -15
+                ),
+                textcoords="offset points",
+                ha="center",
+                fontsize=8
             )
+
+    ax.set_title(
+        f"Percentage Difference: "
+        f"{station1} vs {station2}",
+        fontsize=16,
+        fontweight="bold"
+    )
+
+    ax.set_xlabel("Month")
+
+    ax.set_ylabel(
+        "Difference (%)"
+    )
+
+    ax.set_xticks(x)
+
+    ax.set_xticklabels(
+        MONTHS
+    )
+
+    ax.grid(
+        axis="y",
+        linestyle="--",
+        alpha=0.4
+    )
+
+    plt.tight_layout()
+
+    st.pyplot(
+        fig,
+        use_container_width=True
+    )
+
+    plt.close(fig)
+
+
+    # ========================================================
+    # MAE / ABSOLUTE ERROR GRAPH
+    # ========================================================
+
+    st.subheader(
+        "📊 Monthly Absolute Error"
+    )
+
+    fig, ax = plt.subplots(
+        figsize=(15, 7)
+    )
+
+    bars = ax.bar(
+        x,
+        absolute_error.values,
+        color="seagreen",
+        edgecolor="black"
+    )
+
+    for bar in bars:
+
+        value = bar.get_height()
+
+        if pd.notna(value):
 
             ax.annotate(
                 f"{value:.1f}",
@@ -1475,30 +1540,26 @@ with tab5:
                     + bar.get_width() / 2,
                     value
                 ),
-                xytext=(0, offset),
+                xytext=(0, 5),
                 textcoords="offset points",
                 ha="center",
                 fontsize=8
             )
 
     ax.set_title(
-        f"Basic Difference: "
-        f"{station1} - {station2}",
+        f"Monthly Absolute Error "
+        f"(Overall MAE = {mae:.2f} mm)",
         fontsize=16,
         fontweight="bold"
     )
 
-    ax.set_xlabel(
-        "Month"
-    )
+    ax.set_xlabel("Month")
 
     ax.set_ylabel(
-        "Difference (mm)"
+        "Absolute Error (mm)"
     )
 
-    ax.set_xticks(
-        x
-    )
+    ax.set_xticks(x)
 
     ax.set_xticklabels(
         MONTHS
