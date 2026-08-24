@@ -674,7 +674,7 @@ with tab1:
     download_table(
         comparison,
         f"monthly_comparison_{station1}_{station2}_{target_year}.csv",
-        "download_monthly_comparison_graph"
+        "download_monthly_comparison_table"
     )
 # ============================================================
 # ANOMALY CALCULATION
