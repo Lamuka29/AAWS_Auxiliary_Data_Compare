@@ -261,7 +261,16 @@ except Exception as e:
 # ============================================================
 # STATION LIST
 # ============================================================
-sheets1 = excel1.sheet_names
+# File 1:
+# Ambil hanya Records of Monthly Rainfall Amount dan abaikan sheet 12.1, 13.1, 14.1, dll.
+sheets1 = [
+    sheet
+    for sheet in excel1.sheet_names
+    if not str(sheet).strip().split()[0].endswith(".1")
+]
+
+# File 2:
+# Ambil semua sheet stesen
 sheets2 = excel2.sheet_names
 # ------------------------------------------------------------
 # FILE 1
