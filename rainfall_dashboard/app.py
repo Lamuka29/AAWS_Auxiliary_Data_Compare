@@ -861,11 +861,11 @@ with tab2:
         use_container_width=True,
         hide_index=True
     )
-download_table(
-    anomaly_table.round(2),
-    f"rainfall_anomaly_{station1}_{station2}_{target_year}.csv",
-    "download_anomaly_table"
-)
+    download_table(
+        anomaly_table.round(2),
+        f"rainfall_anomaly_{station1}_{station2}_{target_year}.csv",
+        "download_anomaly_table"
+    )
 # ============================================================
 # TAB 3 - HISTOGRAM
 # ============================================================
@@ -1668,24 +1668,6 @@ with tab5:
     )
     plt.close(fig)
 # ============================================================
-# FUNCTION - GET STATION NAME FROM FILE 1
-# ============================================================
-def get_station_name(uploaded_file,sheet_name):
-    raw = pd.read_excel(
-        uploaded_file,
-        sheet_name=sheet_name,
-        header=None,
-        usecols="B",
-        nrows=4
-    )
-
-    station_name = raw.iloc[3, 0]
-
-    if pd.isna(station_name):
-        return sheet_name
-
-    return str(station_name).strip()
-# ============================================================
 # TITLE
 # ============================================================
 st.title(
@@ -1891,7 +1873,7 @@ except Exception as e:
 sheets1 = [
     sheet
     for sheet in excel1.sheet_names
-    if not str(sheet).strip().split()[0].endswith(".1")
+    if not str(sheet).strip().endswith(".1")
 ]
 
 # File 2:
