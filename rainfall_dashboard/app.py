@@ -21,9 +21,10 @@ MONTHS = [
     "SEP", "OCT", "NOV", "DEC"
 ]
 # ============================================================
-# DOWNLOAD PLOT FUNCTION
+# DOWNLOAD FUNCTIONS
 # ============================================================
-def download_plot(fig, filename):
+
+def download_plot(fig, filename, key):
 
     buffer = io.BytesIO()
 
@@ -41,20 +42,22 @@ def download_plot(fig, filename):
         data=buffer,
         file_name=filename,
         mime="image/png",
-        key=f"download_{filename}"
+        key=key
     )
-def download_table(df, filename):
+
+
+def download_table(df, filename, key):
 
     csv = df.to_csv(
         index=False
     ).encode("utf-8")
 
     st.download_button(
-        "⬇️ Download Table",
+        label="⬇️ Download Table",
         data=csv,
         file_name=filename,
         mime="text/csv",
-        key=f"table_{filename}"
+        key=key
     )
 # ============================================================
 # FUNCTION - GET STATION NAME FROM FILE 1
@@ -631,7 +634,8 @@ with tab1:
     )
     download_plot(
         fig,
-        f"monthly_comparison_{station1}_{station2}_{target_year}.png"
+        f"monthly_comparison_{station1}_{station2}_{target_year}.png",
+        "download_monthly_comparison_graph"
     )
     plt.close(fig)
     # --------------------------------------------------------
@@ -669,7 +673,8 @@ with tab1:
     )
     download_table(
         comparison,
-        f"monthly_comparison_{station1}_{station2}_{target_year}.csv"
+        f"monthly_comparison_{station1}_{station2}_{target_year}.csv",
+        "download_monthly_comparison_graph"
     )
 # ============================================================
 # ANOMALY CALCULATION
@@ -818,7 +823,8 @@ with tab2:
     )
     download_plot(
         fig,
-        f"rainfall_anomaly_{station1}_{station2}_{target_year}.png"
+        f"rainfall_anomaly_{station1}_{station2}_{target_year}.png",
+        "download_anomaly_graph"
     )
     plt.close(fig)
 
@@ -857,7 +863,8 @@ with tab2:
     )
 download_table(
     anomaly_table.round(2),
-    f"rainfall_anomaly_{station1}_{station2}_{target_year}.csv"
+    f"rainfall_anomaly_{station1}_{station2}_{target_year}.csv",
+    "download_anomaly_table"
 )
 # ============================================================
 # TAB 3 - HISTOGRAM
@@ -1073,7 +1080,8 @@ with tab3:
     )
     download_plot(
         fig,
-        f"rainfall_category_{station1}_{station2}_{target_year}.png"
+        f"rainfall_category_{station1}_{station2}_{target_year}.png",
+        "download_rainfall_category_graph"
     )
     plt.close(fig)
     # ========================================================
@@ -1104,6 +1112,7 @@ with tab3:
     download_table(
         category_table,
         f"rainfall_category_{station1}_{station2}_{target_year}.csv"
+        "download_rainfall_category_graph"
     )
 # ============================================================
 # TAB 4 - YEARLY COMPARISON
@@ -1267,7 +1276,8 @@ with tab4:
     )
     download_plot(
         fig,
-        f"yearly_comparison_{station1}_{station2}.png"
+        f"yearly_comparison_{station1}_{station2}.png",
+        "download_yearly_comparison_graph"
     )
     plt.close(fig)
     # --------------------------------------------------------
@@ -1320,7 +1330,8 @@ with tab4:
     )
     download_table(
         yearly_comparison.round(2),
-        f"yearly_comparison_{station1}_{station2}.csv"
+        f"yearly_comparison_{station1}_{station2}.csv",
+        "download_yearly_comparison_graph"
     )
 # ============================================================
 # TAB 5- ERROR ANALYSIS
@@ -1401,7 +1412,8 @@ with tab5:
     )
     download_table(
         error_table.round(2),
-        f"error_analysis_{station1}_{station2}_{target_year}.csv"
+        f"error_analysis_{station1}_{station2}_{target_year}.csv",
+        "download_error_analysis_table"
     )
     # ========================================================
     # X AXIS
@@ -1493,6 +1505,7 @@ with tab5:
     download_plot(
         fig,
         f"basic_difference_{station1}_{station2}_{target_year}.png"
+        "download_basic_difference_graph"
     )
     plt.close(fig)
     # ========================================================
@@ -1576,6 +1589,7 @@ with tab5:
     download_plot(
         fig,
         f"percentage_difference_{station1}_{station2}_{target_year}.png"
+        "download_percentage_difference_graph"
     )
     plt.close(fig)
     # ========================================================
@@ -1649,7 +1663,8 @@ with tab5:
     )
     download_plot(
         fig,
-        f"percentage_difference_{station1}_{station2}_{target_year}.png"
+        f"mean_absolute_error_{station1}_{station2}_{target_year}.png"
+        "download_mean_absolute_error_graph"
     )
     plt.close(fig)
 # ============================================================
