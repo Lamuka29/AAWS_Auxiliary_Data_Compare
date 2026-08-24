@@ -1755,62 +1755,149 @@ with tab5:
     )
     plt.close(fig)
 # ============================================================
-# TAB 6 - BOXPLOT
+# TAB6 - MONTHLY BOXPLOT
 # ============================================================
 
 with tab6:
 
     st.subheader(
-        "📦 Rainfall Distribution Boxplot"
+        "📦 Monthly Rainfall Boxplot"
     )
 
-    values1 = (
-        analysis1[MONTHS]
-        .values
-        .flatten()
+    st.caption(
+        f"Distribution of monthly rainfall: "
+        f"{station1} vs {station2}"
     )
-
-    values2 = (
-        analysis2[MONTHS]
-        .values
-        .flatten()
-    )
-
-    # Remove NaN
-    values1 = values1[
-        ~np.isnan(values1)
-    ]
-
-    values2 = values2[
-        ~np.isnan(values2)
-    ]
 
     # --------------------------------------------------------
-    # BOXPLOT
+    # PREPARE DATA
+    # --------------------------------------------------------
+
+    box_data1 = []
+    box_data2 = []
+
+    for month in MONTHS:
+
+        values1 = pd.to_numeric(
+            analysis1[month],
+            errors="coerce"
+        ).dropna()
+
+        values2 = pd.to_numeric(
+            analysis2[month],
+            errors="coerce"
+        ).dropna()
+
+        box_data1.append(
+            values1.values
+        )
+
+        box_data2.append(
+            values2.values
+        )
+
+    # --------------------------------------------------------
+    # GRAPH
     # --------------------------------------------------------
 
     fig, ax = plt.subplots(
-        figsize=(12, 7)
+        figsize=(16, 8)
     )
 
-    ax.boxplot(
-        [
-            values1,
-            values2
-        ],
-        tick_labels=[
-            station1,
-            station2
-        ],
+    x = np.arange(
+        len(MONTHS)
+    )
+
+    offset = 0.18
+
+    # Station 1
+    bp1 = ax.boxplot(
+        box_data1,
+        positions=x - offset,
+        widths=0.30,
         patch_artist=True,
-        showmeans=True,
+        showfliers=True,
         flierprops=dict(
             marker="o",
             markersize=5,
-            markerfacecolor="red",
-            markeredgecolor="black",
-            alpha=0.7
+            markerfacecolor="steelblue",
+            markeredgecolor="black"
         )
+    )
+
+    # Station 2
+    bp2 = ax.boxplot(
+        box_data2,
+        positions=x + offset,
+        widths=0.30,
+        patch_artist=True,
+        showfliers=True,
+        flierprops=dict(
+            marker="o",
+            markersize=5,
+            markerfacecolor="darkorange",
+            markeredgecolor="black"
+        )
+    )
+
+    # --------------------------------------------------------
+    # BOX COLORS
+    # --------------------------------------------------------
+
+    for box in bp1["boxes"]:
+        box.set_facecolor("steelblue")
+
+    for box in bp2["boxes"]:
+        box.set_facecolor("darkorange")
+
+    # --------------------------------------------------------
+    # MEDIAN
+    # --------------------------------------------------------
+
+    for median in bp1["medians"]:
+        median.set_color("black")
+        median.set_linewidth(2)
+
+    for median in bp2["medians"]:
+        median.set_color("black")
+        median.set_linewidth(2)
+
+    # --------------------------------------------------------
+    # X AXIS
+    # --------------------------------------------------------
+
+    ax.set_xticks(x)
+
+    ax.set_xticklabels(
+        MONTHS
+    )
+
+    # --------------------------------------------------------
+    # LEGEND
+    # --------------------------------------------------------
+
+    from matplotlib.patches import Patch
+
+    legend_elements = [
+
+        Patch(
+            facecolor="steelblue",
+            edgecolor="black",
+            label=station1
+        ),
+
+        Patch(
+            facecolor="darkorange",
+            edgecolor="black",
+            label=station2
+        )
+
+    ]
+
+    ax.legend(
+        handles=legend_elements,
+        bbox_to_anchor=(1.02, 1),
+        loc="upper left"
     )
 
     # --------------------------------------------------------
@@ -1818,13 +1905,14 @@ with tab6:
     # --------------------------------------------------------
 
     ax.set_title(
-        "Rainfall Distribution Comparison",
+        f"Monthly Rainfall Distribution\n"
+        f"{station1} vs {station2}",
         fontsize=16,
         fontweight="bold"
     )
 
     ax.set_xlabel(
-        "Station"
+        "Month"
     )
 
     ax.set_ylabel(
@@ -1837,7 +1925,9 @@ with tab6:
         alpha=0.4
     )
 
-    plt.tight_layout()
+    plt.tight_layout(
+        rect=[0, 0, 0.82, 1]
+    )
 
     st.pyplot(
         fig,
