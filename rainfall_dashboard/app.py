@@ -157,7 +157,7 @@ MAX_CONSECUTIVE_MISSING = st.sidebar.number_input(
 # ============================================================
 st.sidebar.subheader("🌧️ Rainfall Threshold")
 
-VALID_MIN = 0.0
+VALID_MIN = 0.1
 
 WET_DAY_MIN = st.sidebar.number_input(
     "Wet day threshold (mm)",
