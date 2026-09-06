@@ -19,7 +19,7 @@ st.set_page_config(
 )
 
 st.title("🌧️ Rainfall Data Analysis")
-st.caption("Pemprosesan, Quality Control dan Analisis Data Hujan Harian")
+st.caption("Pemprosesan, Quality Control dan Analisis Data Hujan")
 # ============================================================
 # MONTHS
 # ============================================================
@@ -37,7 +37,7 @@ FIG_HEIGHT = 9
 # ============================================================
 # FILE UPLOAD
 # ============================================================
-uploaded_files = st.file_uploader("📁 Upload Excel file data hujan mengikut stesen AAWS",
+uploaded_files = st.file_uploader("📁 Upload Excel file data hujan",
     type=["xlsx", "xls"],
     accept_multiple_files=True)
 
