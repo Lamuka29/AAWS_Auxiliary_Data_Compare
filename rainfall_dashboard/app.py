@@ -5317,7 +5317,7 @@ with main_tabs[3]:
     )
 
     period_years = int(END_YEAR) - int(START_YEAR) + 1
-
+    
     if period_years != 30:
         st.warning(
             f"⚠️ Tempoh yang dipilih ialah {period_years} tahun "
