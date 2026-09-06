@@ -5331,7 +5331,7 @@ with main_tabs[3]:
         "Analisis ini mencari jumlah hujan harian tertinggi "
         "daripada semua stesen bagi semua tahun dalam tempoh "
         f"{YEAR_RANGE_TEXT}. Nilai kosong dan nilai di bawah "
-        f"{VALID_MIN} mm tidak diambil kira."
+        "0.1 mm tidak diambil kira."
     )
 
     highest_records = []
