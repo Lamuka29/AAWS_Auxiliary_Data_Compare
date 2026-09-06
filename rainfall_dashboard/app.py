@@ -43,16 +43,6 @@ uploaded_files = st.file_uploader("📁 Upload Excel file data hujan",
 
 if not uploaded_files:
     st.info("Sila upload sekurang-kurangnya satu fail Excel.")
-    st.markdown(
-        """
-        **Format data yang diperlukan:**
-        - Sheet dinamakan mengikut tahun, contoh `2016`, `2017`, ..., `2025`
-        - Header berada pada baris ke-7 Excel
-        - Column A = `hari`
-        - Column B:M = `Jan` hingga `Dec`
-        """
-    )
-    st.stop()
 # ============================================================
 # DETECT AVAILABLE YEARS
 # ============================================================
