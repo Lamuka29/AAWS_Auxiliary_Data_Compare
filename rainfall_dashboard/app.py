@@ -5624,58 +5624,6 @@ with main_tabs[3]:
                 f"{YEAR_RANGE_TEXT}"
             )
         )
-
-        # --------------------------------------------------------
-        # OPTIONAL: COMPLETE RANKING
-        # --------------------------------------------------------
-        with st.expander(
-            "📋 Lihat semua rekod hujan harian mengikut ranking"
-        ):
-            complete_ranking = highest_daily_df.copy()
-
-            complete_ranking = complete_ranking[
-                [
-                    "Rank",
-                    "Date",
-                    "Year",
-                    "Month",
-                    "hari",
-                    "Station",
-                    "Rainfall (mm)"
-                ]
-            ]
-
-            complete_ranking = complete_ranking.rename(
-                columns={
-                    "Date": "Tarikh",
-                    "Year": "Tahun",
-                    "Month": "Bulan",
-                    "hari": "Hari",
-                    "Station": "Stesen",
-                    "Rainfall (mm)": "Hujan Harian (mm)"
-                }
-            )
-
-            complete_ranking["Tarikh"] = complete_ranking[
-                "Tarikh"
-            ].dt.strftime("%d-%m-%Y")
-
-            complete_ranking["Hujan Harian (mm)"] = complete_ranking[
-                "Hujan Harian (mm)"
-            ].round(2)
-
-            st.dataframe(
-                complete_ranking,
-                use_container_width=True,
-                hide_index=True
-            )
-
-    else:
-        st.warning(
-            "⚠️ Tiada rekod hujan harian yang sah ditemui "
-            f"bagi tempoh {YEAR_RANGE_TEXT}."
-        )
-
 # ============================================================
 # FOOTER
 # ============================================================
