@@ -5503,20 +5503,6 @@ with main_tabs[3]:
         st.divider()
 
         # --------------------------------------------------------
-        # TOP 10 TABLE
-        # --------------------------------------------------------
-        st.subheader(
-            f"🏆 Ranking Top 10 Highest Daily Rainfall "
-            f"({YEAR_RANGE_TEXT})"
-        )
-
-        st.dataframe(
-            top10_daily,
-            use_container_width=True,
-            hide_index=True
-        )
-
-        # --------------------------------------------------------
         # TOP 10 GRAPH
         # --------------------------------------------------------
         st.subheader("📊 Graf Top 10 Highest Daily Rainfall")
@@ -5575,7 +5561,19 @@ with main_tabs[3]:
 
         plt.tight_layout()
         st.pyplot(fig, use_container_width=True)
+        # --------------------------------------------------------
+        # TOP 10 TABLE
+        # --------------------------------------------------------
+        st.subheader(
+            f"🏆 Ranking Top 10 Highest Daily Rainfall "
+            f"({YEAR_RANGE_TEXT})"
+        )
 
+        st.dataframe(
+            top10_daily,
+            use_container_width=True,
+            hide_index=True
+        )
         # --------------------------------------------------------
         # DOWNLOAD GRAPH PNG
         # --------------------------------------------------------
