@@ -43,6 +43,7 @@ uploaded_files = st.file_uploader("📁 Upload Excel file data hujan",
 
 if not uploaded_files:
     st.info("Sila upload sekurang-kurangnya satu fail Excel.")
+    st.stop()
 # ============================================================
 # DETECT AVAILABLE YEARS
 # ============================================================
