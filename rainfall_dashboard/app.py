@@ -5456,6 +5456,34 @@ with main_tabs[3]:
         "🏆 Top 10 Tertinggi",
         "📅 Maximum Mengikut Tahun"
     ])
+
+    # ========================================================
+    # PILIH STESEN
+    # ========================================================
+    
+    station_options = sorted(
+        highest_daily_df["Station"].dropna().unique()
+    )
+    
+    selected_station_rainfall = st.selectbox(
+        "🏢 Pilih Stesen",
+        station_options,
+        key="rainfall_extreme_station"
+    )
+    
+    station_rainfall_df = (
+        highest_daily_df[
+            highest_daily_df["Station"]
+            == selected_station_rainfall
+        ]
+        .copy()
+        .sort_values(
+            "Rainfall (mm)",
+            ascending=False
+        )
+        .reset_index(drop=True)
+    )
+    
     # ========================================================
     # TAB 1 — REKOD TERTINGGI
     # ========================================================
@@ -5467,7 +5495,7 @@ with main_tabs[3]:
         )
     
         highest_row = (
-            highest_daily_df
+            station_rainfall_df
             .iloc[0]
         )
     
@@ -5497,12 +5525,6 @@ with main_tabs[3]:
                 highest_date.strftime("%d/%m/%Y")
             )
     
-        with col3:
-            st.metric(
-                "📍 Stesen",
-                highest_station
-            )
-    
         st.markdown("---")
     
         record_table = pd.DataFrame({
@@ -5511,16 +5533,14 @@ with main_tabs[3]:
                 "Tarikh",
                 "Tahun",
                 "Bulan",
-                "Hari",
-                "Stesen"
+                "Hari"
             ],
             "Nilai": [
                 f"{highest_value:.2f} mm",
                 highest_date.strftime("%d/%m/%Y"),
                 highest_date.year,
                 highest_date.strftime("%B"),
-                highest_date.day,
-                highest_station
+                highest_date.day
             ]
         })
     
@@ -5560,7 +5580,7 @@ with main_tabs[3]:
         )
     
         top10_data = (
-            highest_daily_df
+            station_rainfall_df
             .sort_values(
                 "Rainfall (mm)",
                 ascending=False
@@ -5578,7 +5598,6 @@ with main_tabs[3]:
             [
                 "Rank",
                 "Date",
-                "Station",
                 "Rainfall (mm)"
             ]
         ].copy()
@@ -5587,7 +5606,6 @@ with main_tabs[3]:
             columns={
                 "Rank": "Kedudukan",
                 "Date": "Tarikh",
-                "Station": "Stesen",
                 "Rainfall (mm)": "Hujan Harian (mm)"
             }
         )
@@ -5634,12 +5652,8 @@ with main_tabs[3]:
     
         ax.set_yticklabels(
             [
-                f"{station} - "
-                f"{date.strftime('%d-%m-%Y')}"
-                for station, date
-                in zip(
-                    plot_data["Station"],
-                    plot_data["Date"]
+                date.strftime("%d-%m-%Y")
+                for date in plot_data["Date"]
                 )
             ]
         )
@@ -5650,6 +5664,7 @@ with main_tabs[3]:
     
         ax.set_title(
             f"Top 10 Hujan Harian Tertinggi\n"
+            f"Stesen: {selected_station_rainfall} | "
             f"{YEAR_RANGE_TEXT}",
             fontsize=16,
             fontweight="bold"
@@ -5739,13 +5754,13 @@ with main_tabs[3]:
         )
     
         annual_max_idx = (
-            highest_daily_df
+            station_rainfall_df
             .groupby("Year")["Rainfall (mm)"]
             .idxmax()
         )
     
         annual_max = (
-            highest_daily_df
+            station_rainfall_df
             .loc[
                 annual_max_idx,
                 [
@@ -5760,12 +5775,17 @@ with main_tabs[3]:
         )
     
         annual_max_display = (
-            annual_max
+            annual_max[
+                [
+                    "Year",
+                    "Date",
+                    "Rainfall (mm)"
+                ]
+            ]
             .rename(
                 columns={
                     "Year": "Tahun",
                     "Date": "Tarikh",
-                    "Station": "Stesen",
                     "Rainfall (mm)": "Maximum (mm)"
                 }
             )
@@ -5824,6 +5844,7 @@ with main_tabs[3]:
     
         ax.set_title(
             f"Maximum Daily Rainfall Mengikut Tahun\n"
+            f"Stesen: {selected_station_rainfall} | "
             f"{YEAR_RANGE_TEXT}",
             fontsize=16,
             fontweight="bold"
