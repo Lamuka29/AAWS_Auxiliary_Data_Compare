@@ -5680,7 +5680,32 @@ with main_tabs[3]:
             fig,
             use_container_width=True
         )
-    
+        # ====================================================
+        # DOWNLOAD GRAF PNG
+        # ====================================================
+        
+        img = io.BytesIO()
+        
+        fig.savefig(
+            img,
+            format="png",
+            dpi=300,
+            bbox_inches="tight"
+        )
+        
+        img.seek(0)
+        
+        st.download_button(
+            "🖼️ Download Graf PNG",
+            data=img,
+            file_name=(
+                f"top10_highest_daily_rainfall_"
+                f"{YEAR_RANGE_TEXT}.png"
+            ),
+            mime="image/png",
+            key="download_rainfall_top10_png"
+        )
+
         plt.close(fig)
     
         # ====================================================
@@ -5821,7 +5846,29 @@ with main_tabs[3]:
             fig,
             use_container_width=True
         )
-    
+        
+        img = io.BytesIO()
+        
+        fig.savefig(
+            img,
+            format="png",
+            dpi=300,
+            bbox_inches="tight"
+        )
+        
+        img.seek(0)
+        
+        st.download_button(
+            "🖼️ Download Graf PNG",
+            data=img,
+            file_name=(
+                f"annual_maximum_daily_rainfall_"
+                f"{YEAR_RANGE_TEXT}.png"
+            ),
+            mime="image/png",
+            key="download_rainfall_annual_max_png"
+        )
+
         plt.close(fig)
         # ====================================================
         # DOWNLOAD
