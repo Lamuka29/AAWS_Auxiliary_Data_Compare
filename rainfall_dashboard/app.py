@@ -5296,32 +5296,56 @@ with main_tabs[2]:
                 )
                 st.divider()
 # ============================================================
-# main tabs 4 HIGHEST DAILY RAINFALL - 30 YEARS
+# MAIN TAB 4 — HIGHEST DAILY RAINFALL
 # ============================================================
-with main_tabs[3]:
-    st.header(f"🌧️ Highest Daily Rainfall {YEAR_RANGE_TEXT}")
 
-    period_years = int(END_YEAR) - int(START_YEAR) + 1
-    
+with main_tabs[3]:
+
+    st.header(
+        f"🌧️ Highest Daily Rainfall {YEAR_RANGE_TEXT}"
+    )
+
+    # ========================================================
+    # TEMPOH ANALISIS
+    # ========================================================
+
+    period_years = (
+        int(END_YEAR)
+        - int(START_YEAR)
+        + 1
+    )
+
     if period_years != 30:
+
         st.warning(
-            f"⚠️ Tempoh yang dipilih ialah {period_years} tahun ", f"({int(START_YEAR)}–{int(END_YEAR)}). "
-            "Untuk analisis tepat 30 tahun, sila tetapkan Start Year dan End Year supaya merangkumi 30 tahun "
-            "(End Year - Start Year + 1 = 30)."
+            f"⚠️ Tempoh yang dipilih ialah "
+            f"{period_years} tahun "
+            f"({int(START_YEAR)}–{int(END_YEAR)}). "
+            "Untuk analisis tepat 30 tahun, sila tetapkan "
+            "Start Year dan End Year supaya merangkumi 30 tahun."
         )
 
     st.info(
-        "Analisis ini mencari jumlah hujan harian tertinggi daripada semua stesen bagi semua tahun dalam tempoh "
-        f"{YEAR_RANGE_TEXT}. Nilai kosong dan nilai di bawah 0.1 mm tidak diambil kira."
+        "Analisis ini mencari rekod hujan harian tertinggi "
+        "daripada semua stesen bagi semua tahun dalam tempoh "
+        f"{YEAR_RANGE_TEXT}. Nilai kosong dan nilai di bawah "
+        "0.1 mm tidak diambil kira."
     )
 
+    # ========================================================
+    # KUMPUL DATA SEMUA STESEN
+    # ========================================================
+
     highest_records = []
+
     for result in successful_results:
-        all_daily_station = result["all_daily"].copy()
+
+        all_daily_station = (
+            result["all_daily"].copy()
+        )
+
         station_name = result["file_name"]
-        # --------------------------------------------------------
-        # FILTER SELECTED 30-YEAR PERIOD
-        # --------------------------------------------------------
+
         period_data = all_daily_station[
             all_daily_station["Year"].between(
                 int(START_YEAR),
@@ -5331,9 +5355,7 @@ with main_tabs[3]:
 
         if period_data.empty:
             continue
-        # --------------------------------------------------------
-        # CONVERT DAILY DATA FROM WIDE TO LONG FORMAT
-        # --------------------------------------------------------
+
         daily_long = period_data.melt(
             id_vars=["Year", "hari"],
             value_vars=months,
@@ -5341,26 +5363,30 @@ with main_tabs[3]:
             value_name="Rainfall (mm)"
         )
 
-        # --------------------------------------------------------
-        # VALID DAILY RAINFALL ONLY
-        # --------------------------------------------------------
+        daily_long["Rainfall (mm)"] = pd.to_numeric(
+            daily_long["Rainfall (mm)"],
+            errors="coerce"
+        )
+
         daily_long = daily_long[
             daily_long["Rainfall (mm)"].notna()
-            & (daily_long["Rainfall (mm)"] >= VALID_MIN)
+            &
+            (
+                daily_long["Rainfall (mm)"]
+                >= VALID_MIN
+            )
         ].copy()
 
         if daily_long.empty:
             continue
-        # --------------------------------------------------------
-        # CREATE DATE
-        # --------------------------------------------------------
+
         month_number = {
             month: i + 1
             for i, month in enumerate(months)
         }
 
-        daily_long["Month Number"] = daily_long["Month"].map(
-            month_number
+        daily_long["Month Number"] = (
+            daily_long["Month"].map(month_number)
         )
 
         daily_long["Date"] = pd.to_datetime(
@@ -5379,157 +5405,58 @@ with main_tabs[3]:
         daily_long["Station"] = station_name
 
         highest_records.append(
-            daily_long[["Date","Year","Month","hari","Station","Rainfall (mm)"]])
-    # ------------------------------------------------------------
-    # COMBINE ALL STATIONS
-    # ------------------------------------------------------------
-    if highest_records:
-        highest_daily_df = pd.concat(
-            highest_records,
-            ignore_index=True)
+            daily_long[
+                [
+                    "Date",
+                    "Year",
+                    "Month",
+                    "hari",
+                    "Station",
+                    "Rainfall (mm)"
+                ]
+            ]
+        )
 
-        highest_daily_df = highest_daily_df.sort_values(
-            by="Rainfall (mm)",
+    # ========================================================
+    # CHECK DATA
+    # ========================================================
+
+    if not highest_records:
+
+        st.warning(
+            "⚠️ Tiada data hujan yang sah untuk dianalisis."
+        )
+
+        st.stop()
+
+    highest_daily_df = pd.concat(
+        highest_records,
+        ignore_index=True
+    )
+
+    highest_daily_df = (
+        highest_daily_df
+        .sort_values(
+            "Rainfall (mm)",
             ascending=False
-        ).reset_index(drop=True)
-
-        # Ranking of individual rainfall records
-        highest_daily_df["Rank"] = (
-            highest_daily_df.index + 1)
-        # --------------------------------------------------------
-        # TOP 10
-        # --------------------------------------------------------
-        top10_daily = highest_daily_df.head(10).copy()
-        top10_daily = top10_daily[["Rank","Date","Year","Month","hari","Station","Rainfall (mm)"]]
-        top10_daily = top10_daily.rename(columns={"Date": "Tarikh","Year": "Tahun","Month": "Bulan","hari": "Hari","Station": "Stesen","Rainfall (mm)": "Hujan Harian (mm)"})
-        top10_daily["Tarikh"] = top10_daily["Tarikh"].dt.strftime("%d-%m-%Y")
-        top10_daily["Hujan Harian (mm)"] = top10_daily["Hujan Harian (mm)"].round(2)
-        # --------------------------------------------------------
-        # SUMMARY METRICS
-        # --------------------------------------------------------
-        top_record = top10_daily.iloc[0]
-
-        metric1, metric2, metric3, metric4 = st.columns(4)
-        with metric1:
-            st.metric("🥇 Highest Daily Rainfall",f"{top_record['Hujan Harian (mm)']:.2f} mm")
-        with metric2:
-            st.metric("📅 Tarikh",top_record["Tarikh"])
-        with metric3:
-            st.metric("📍 Stesen",top_record["Stesen"])
-        with metric4:
-            st.metric("📊 Jumlah Rekod",f"{len(highest_daily_df):,}")
-        st.divider()
-        # --------------------------------------------------------
-        # TOP 10 GRAPH
-        # --------------------------------------------------------
-        st.subheader("📊 Graf Top 10 Highest Daily Rainfall")
-
-        chart_df = top10_daily.copy()
-        chart_df["Label"] = (
-            chart_df["Rank"].astype(str)
-            + ". "
-            + chart_df["Tarikh"]
-            + " – "
-            + chart_df["Stesen"].astype(str)
         )
+        .reset_index(drop=True)
+    )
 
-        chart_df = chart_df.sort_values(
-            "Hujan Harian (mm)",
-            ascending=True
-        )
+    highest_daily_df["Rank"] = (
+        highest_daily_df.index + 1
+    )
 
-        fig, ax = plt.subplots(
-            figsize=(FIG_WIDTH, 8)
-        )
+    # ========================================================
+    # SUB TABS
+    # ========================================================
 
-        bars = ax.barh(
-            chart_df["Label"],
-            chart_df["Hujan Harian (mm)"],
-            edgecolor="black",
-            linewidth=0.8
-        )
-
-        for bar, value in zip(
-            bars,
-            chart_df["Hujan Harian (mm)"]
-        ):
-            ax.text(
-                bar.get_width(),
-                bar.get_y() + bar.get_height() / 2,
-                f" {value:.1f} mm",
-                va="center",
-                fontsize=10,
-                fontweight="bold"
-            )
-
-        ax.set_title(
-            f"Top 10 Highest Daily Rainfall\n"
-            f"{YEAR_RANGE_TEXT}",
-            fontsize=16,
-            fontweight="bold"
-        )
-        ax.set_xlabel("Daily Rainfall (mm)", fontsize=12)
-        ax.set_ylabel("Rank – Date – Station", fontsize=12)
-        ax.grid(
-            axis="x",
-            linestyle="--",
-            alpha=0.3
-        )
-
-        plt.tight_layout()
-        st.pyplot(fig, use_container_width=True)
-        # --------------------------------------------------------
-        # TOP 10 TABLE
-        # --------------------------------------------------------
-        st.subheader(f"🏆 Ranking Top 10 Highest Daily Rainfall ",f"({YEAR_RANGE_TEXT})")
-        st.dataframe(top10_daily,use_container_width=True,hide_index=True)
-        # --------------------------------------------------------
-        # DOWNLOAD GRAPH PNG
-        # --------------------------------------------------------
-        img_buffer = io.BytesIO()
-        fig.savefig(
-            img_buffer,
-            format="png",
-            dpi=300,
-            bbox_inches="tight"
-        )
-        img_buffer.seek(0)
-
-        st.download_button(
-            "📥 Download Graf Top 10 (PNG)",
-            data=img_buffer.getvalue(),
-            file_name=(
-                f"highest_daily_rainfall_top10_"
-                f"{YEAR_RANGE_TEXT}.png"
-            ),
-            mime="image/png",
-            key=(
-                f"download_highest_daily_top10_"
-                f"{YEAR_RANGE_TEXT}"
-            )
-        )
-
-        plt.close(fig)
-        # --------------------------------------------------------
-        # DOWNLOAD TOP 10 CSV
-        # --------------------------------------------------------
-        top10_csv = top10_daily.to_csv(
-            index=False
-        ).encode("utf-8-sig")
-
-        st.download_button(
-            "📥 Download Ranking Top 10 (CSV)",
-            data=top10_csv,
-            file_name=(
-                f"highest_daily_rainfall_top10_"
-                f"{YEAR_RANGE_TEXT}.csv"
-            ),
-            mime="text/csv",
-            key=(
-                f"download_highest_daily_top10_csv_"
-                f"{YEAR_RANGE_TEXT}"
-            )
-        )
+    rainfall_tabs = st.tabs([
+        "🌧️ Rekod Tertinggi",
+        "🏆 Top 10 Tertinggi",
+        "📅 Maximum Mengikut Tahun",
+        "📊 Statistics"
+    ])
 # ============================================================
 # FOOTER
 # ============================================================
