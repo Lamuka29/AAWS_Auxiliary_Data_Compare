@@ -5454,9 +5454,355 @@ with main_tabs[3]:
     rainfall_tabs = st.tabs([
         "🌧️ Rekod Tertinggi",
         "🏆 Top 10 Tertinggi",
-        "📅 Maximum Mengikut Tahun",
-        "📊 Statistics"
+        "📅 Maximum Mengikut Tahun"
     ])
+    # ========================================================
+    # TAB 1 — REKOD TERTINGGI
+    # ========================================================
+    
+    with rainfall_tabs[0]:
+    
+        st.subheader(
+            "🌧️ Rekod Hujan Harian Tertinggi"
+        )
+    
+        highest_row = (
+            highest_daily_df
+            .iloc[0]
+        )
+    
+        highest_value = (
+            highest_row["Rainfall (mm)"]
+        )
+    
+        highest_date = (
+            highest_row["Date"]
+        )
+    
+        highest_station = (
+            highest_row["Station"]
+        )
+    
+        col1, col2, col3 = st.columns(3)
+    
+        with col1:
+            st.metric(
+                "🌧️ Hujan Tertinggi",
+                f"{highest_value:.2f} mm"
+            )
+    
+        with col2:
+            st.metric(
+                "📅 Tarikh",
+                highest_date.strftime("%d/%m/%Y")
+            )
+    
+        with col3:
+            st.metric(
+                "📍 Stesen",
+                highest_station
+            )
+    
+        st.markdown("---")
+    
+        record_table = pd.DataFrame({
+            "Perkara": [
+                "Hujan Harian",
+                "Tarikh",
+                "Tahun",
+                "Bulan",
+                "Hari",
+                "Stesen"
+            ],
+            "Nilai": [
+                f"{highest_value:.2f} mm",
+                highest_date.strftime("%d/%m/%Y"),
+                highest_date.year,
+                highest_date.strftime("%B"),
+                highest_date.day,
+                highest_station
+            ]
+        })
+    
+        st.dataframe(
+            record_table,
+            use_container_width=True,
+            hide_index=True
+        )
+    # ========================================================
+    # TAB 2 — TOP 10 TERTINGGI
+    # ========================================================
+    
+    with rainfall_tabs[1]:
+    
+        st.subheader(
+            "🏆 Top 10 Hujan Harian Tertinggi"
+        )
+    
+        top10_data = (
+            highest_daily_df
+            .sort_values(
+                "Rainfall (mm)",
+                ascending=False
+            )
+            .head(10)
+            .copy()
+        )
+    
+        top10_data["Rank"] = range(
+            1,
+            len(top10_data) + 1
+        )
+    
+        display_top10 = top10_data[
+            [
+                "Rank",
+                "Date",
+                "Station",
+                "Rainfall (mm)"
+            ]
+        ].copy()
+    
+        display_top10 = display_top10.rename(
+            columns={
+                "Rank": "Kedudukan",
+                "Date": "Tarikh",
+                "Station": "Stesen",
+                "Rainfall (mm)": "Hujan Harian (mm)"
+            }
+        )
+    
+        display_top10["Tarikh"] = (
+            pd.to_datetime(
+                display_top10["Tarikh"]
+            )
+            .dt.strftime("%d-%m-%Y")
+        )
+    
+        display_top10["Hujan Harian (mm)"] = (
+            display_top10["Hujan Harian (mm)"]
+            .round(2)
+        )
+    
+        st.dataframe(
+            display_top10,
+            use_container_width=True,
+            hide_index=True
+        )
+    
+        # ====================================================
+        # GRAPH
+        # ====================================================
+    
+        fig, ax = plt.subplots(
+            figsize=(14, 8)
+        )
+    
+        plot_data = top10_data.sort_values(
+            "Rainfall (mm)",
+            ascending=True
+        )
+    
+        bars = ax.barh(
+            range(len(plot_data)),
+            plot_data["Rainfall (mm)"]
+        )
+    
+        ax.set_yticks(
+            range(len(plot_data))
+        )
+    
+        ax.set_yticklabels(
+            [
+                f"{station} - "
+                f"{date.strftime('%d-%m-%Y')}"
+                for station, date
+                in zip(
+                    plot_data["Station"],
+                    plot_data["Date"]
+                )
+            ]
+        )
+    
+        ax.set_xlabel(
+            "Hujan Harian (mm)"
+        )
+    
+        ax.set_title(
+            f"Top 10 Hujan Harian Tertinggi\n"
+            f"{YEAR_RANGE_TEXT}",
+            fontsize=16,
+            fontweight="bold"
+        )
+    
+        ax.grid(
+            True,
+            axis="x",
+            linestyle="--",
+            alpha=0.4
+        )
+    
+        for i, value in enumerate(
+            plot_data["Rainfall (mm)"]
+        ):
+            ax.text(
+                value + 1,
+                i,
+                f"{value:.1f} mm",
+                va="center",
+                fontsize=9,
+                fontweight="bold"
+            )
+    
+        plt.tight_layout()
+    
+        st.pyplot(
+            fig,
+            use_container_width=True
+        )
+    
+        plt.close(fig)
+    
+        # ====================================================
+        # DOWNLOAD
+        # ====================================================
+    
+        csv_top10 = (
+            display_top10
+            .to_csv(index=False)
+            .encode("utf-8-sig")
+        )
+    
+        st.download_button(
+            "⬇️ Download Top 10",
+            data=csv_top10,
+            file_name=(
+                f"top10_highest_daily_rainfall_"
+                f"{YEAR_RANGE_TEXT}.csv"
+            ),
+            mime="text/csv",
+            key="download_rainfall_top10"
+        )
+    # ========================================================
+    # TAB 3 — MAXIMUM MENGIKUT TAHUN
+    # ========================================================
+    
+    with rainfall_tabs[2]:
+    
+        st.subheader(
+            "📅 Hujan Harian Maximum Mengikut Tahun"
+        )
+    
+        annual_max_idx = (
+            highest_daily_df
+            .groupby("Year")["Rainfall (mm)"]
+            .idxmax()
+        )
+    
+        annual_max = (
+            highest_daily_df
+            .loc[
+                annual_max_idx,
+                [
+                    "Year",
+                    "Date",
+                    "Station",
+                    "Rainfall (mm)"
+                ]
+            ]
+            .copy()
+            .sort_values("Year")
+        )
+    
+        annual_max_display = (
+            annual_max
+            .rename(
+                columns={
+                    "Year": "Tahun",
+                    "Date": "Tarikh",
+                    "Station": "Stesen",
+                    "Rainfall (mm)": "Maximum (mm)"
+                }
+            )
+            .reset_index(drop=True)
+        )
+    
+        annual_max_display["Tarikh"] = (
+            pd.to_datetime(
+                annual_max_display["Tarikh"]
+            )
+            .dt.strftime("%d/%m/%Y")
+        )
+    
+        annual_max_display[
+            "Maximum (mm)"
+        ] = annual_max_display[
+            "Maximum (mm)"
+        ].round(2)
+    
+        st.dataframe(
+            annual_max_display,
+            use_container_width=True,
+            hide_index=True
+        )
+    
+        # ----------------------------------------------------
+        # GRAPH
+        # ----------------------------------------------------
+    
+        fig, ax = plt.subplots(
+            figsize=(FIG_WIDTH, FIG_HEIGHT)
+        )
+    
+        bars = ax.bar(
+            annual_max["Year"].astype(str),
+            annual_max["Rainfall (mm)"],
+            edgecolor="black",
+            linewidth=0.8
+        )
+    
+        for bar, value in zip(
+            bars,
+            annual_max["Rainfall (mm)"]
+        ):
+    
+            ax.text(
+                bar.get_x()
+                + bar.get_width() / 2,
+                bar.get_height() + 2,
+                f"{value:.1f}",
+                ha="center",
+                va="bottom",
+                fontsize=9,
+                fontweight="bold"
+            )
+    
+        ax.set_title(
+            f"Maximum Daily Rainfall Mengikut Tahun\n"
+            f"{YEAR_RANGE_TEXT}",
+            fontsize=16,
+            fontweight="bold"
+        )
+    
+        ax.set_xlabel("Tahun")
+        ax.set_ylabel("Maximum Daily Rainfall (mm)")
+    
+        ax.grid(
+            True,
+            axis="y",
+            linestyle="--",
+            alpha=0.4
+        )
+    
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+    
+        st.pyplot(
+            fig,
+            use_container_width=True
+        )
+    
+        plt.close(fig)
 # ============================================================
 # FOOTER
 # ============================================================
