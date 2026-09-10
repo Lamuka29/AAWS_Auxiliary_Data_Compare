@@ -5654,7 +5654,6 @@ with main_tabs[3]:
             [
                 date.strftime("%d-%m-%Y")
                 for date in plot_data["Date"]
-                )
             ]
         )
     
