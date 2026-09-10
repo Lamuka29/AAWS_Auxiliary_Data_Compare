@@ -5529,6 +5529,26 @@ with main_tabs[3]:
             use_container_width=True,
             hide_index=True
         )
+        # ====================================================
+        # DOWNLOAD
+        # ====================================================
+        
+        csv_record = (
+            record_table
+            .to_csv(index=False)
+            .encode("utf-8-sig")
+        )
+        
+        st.download_button(
+            "⬇️ Download Rekod Tertinggi",
+            data=csv_record,
+            file_name=(
+                f"highest_daily_rainfall_record_"
+                f"{YEAR_RANGE_TEXT}.csv"
+            ),
+            mime="text/csv",
+            key="download_rainfall_record"
+        )
     # ========================================================
     # TAB 2 — TOP 10 TERTINGGI
     # ========================================================
@@ -5803,6 +5823,26 @@ with main_tabs[3]:
         )
     
         plt.close(fig)
+        # ====================================================
+        # DOWNLOAD
+        # ====================================================
+        
+        csv_annual = (
+            annual_max_display
+            .to_csv(index=False)
+            .encode("utf-8-sig")
+        )
+        
+        st.download_button(
+            "⬇️ Download Maximum Mengikut Tahun",
+            data=csv_annual,
+            file_name=(
+                f"annual_maximum_daily_rainfall_"
+                f"{YEAR_RANGE_TEXT}.csv"
+            ),
+            mime="text/csv",
+            key="download_rainfall_annual_max"
+        )
 # ============================================================
 # FOOTER
 # ============================================================
